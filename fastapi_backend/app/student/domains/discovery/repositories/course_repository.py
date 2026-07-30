@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import or_, select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
+from app.shared.constants.institution import NORTHERN_NEW_MEXICO_COLLEGE_NAME
 from app.student.domains.discovery.models import (
     Course,
     CourseCorequisite,
@@ -13,7 +14,6 @@ from app.student.domains.discovery.models import (
     Program,
     University,
 )
-from app.shared.constants.institution import NORTHERN_NEW_MEXICO_COLLEGE_NAME
 
 
 class CourseRepository:
@@ -48,9 +48,7 @@ class CourseRepository:
         result = await db.execute(statement)
         return [_course_to_dict(course) for course in result.scalars().all()]
 
-    async def get_course_by_id(
-        self, db: AsyncSession, course_id: str | uuid.UUID
-    ) -> dict | None:
+    async def get_course_by_id(self, db: AsyncSession, course_id: str | uuid.UUID) -> dict | None:
         parsed_course_id = _parse_uuid(course_id)
         if parsed_course_id is None:
             return None
@@ -72,20 +70,25 @@ class CourseRepository:
             .where(
                 CoursePrerequisite.course_id == parsed_course_id,
                 CoursePrerequisite.course.has(
-                    Course.program.has(
-                        Program.university.has(
-                            University.university_name.ilike(
-                                NORTHERN_NEW_MEXICO_COLLEGE_NAME
+                    and_(
+                        Course.metadata_json["is_current_catalog"].as_boolean().is_not(False),
+                        Course.program.has(
+                            and_(
+                                Program.metadata_json["is_current_catalog"]
+                                .as_boolean()
+                                .is_not(False),
+                                Program.university.has(
+                                    University.university_name.ilike(
+                                        NORTHERN_NEW_MEXICO_COLLEGE_NAME
+                                    )
+                                ),
                             )
-                        )
+                        ),
                     )
                 ),
             )
         )
-        return [
-            _prerequisite_to_dict(link)
-            for link in result.scalars().all()
-        ]
+        return [_prerequisite_to_dict(link) for link in result.scalars().all()]
 
     async def list_corequisites(
         self, db: AsyncSession, course_id: str | uuid.UUID
@@ -99,20 +102,25 @@ class CourseRepository:
             .where(
                 CourseCorequisite.course_id == parsed_course_id,
                 CourseCorequisite.course.has(
-                    Course.program.has(
-                        Program.university.has(
-                            University.university_name.ilike(
-                                NORTHERN_NEW_MEXICO_COLLEGE_NAME
+                    and_(
+                        Course.metadata_json["is_current_catalog"].as_boolean().is_not(False),
+                        Course.program.has(
+                            and_(
+                                Program.metadata_json["is_current_catalog"]
+                                .as_boolean()
+                                .is_not(False),
+                                Program.university.has(
+                                    University.university_name.ilike(
+                                        NORTHERN_NEW_MEXICO_COLLEGE_NAME
+                                    )
+                                ),
                             )
-                        )
+                        ),
                     )
                 ),
             )
         )
-        return [
-            _corequisite_to_dict(link)
-            for link in result.scalars().all()
-        ]
+        return [_corequisite_to_dict(link) for link in result.scalars().all()]
 
 
 def _course_query(*, include_dependencies: bool = False):
@@ -132,13 +140,15 @@ def _course_query(*, include_dependencies: bool = False):
         select(Course)
         .options(*options)
         .where(
+            Course.metadata_json["is_current_catalog"].as_boolean().is_not(False),
             Course.program.has(
-                Program.university.has(
-                    University.university_name.ilike(
-                        NORTHERN_NEW_MEXICO_COLLEGE_NAME
-                    )
+                and_(
+                    Program.metadata_json["is_current_catalog"].as_boolean().is_not(False),
+                    Program.university.has(
+                        University.university_name.ilike(NORTHERN_NEW_MEXICO_COLLEGE_NAME)
+                    ),
                 )
-            )
+            ),
         )
     )
 
@@ -155,11 +165,17 @@ def _parse_uuid(value: str | uuid.UUID) -> uuid.UUID | None:
 def _course_to_dict(course: Course, *, include_dependencies: bool = False) -> dict:
     payload = _course_summary_to_dict(course)
     program = course.program
+    program_metadata = program.metadata_json or {}
     payload["program"] = {
         "program_id": str(program.program_id),
         "program_name": program.program_name,
         "degree": program.degree,
         "total_credit_hours": program.total_credit_hours,
+        "catalog_title": program_metadata.get("catalog_title"),
+        "catalog_url": program_metadata.get("catalog_url"),
+        "catalog_year": program_metadata.get("catalog_year"),
+        "description": "\n\n".join(program_metadata.get("catalog_intro") or []) or None,
+        "metadata_json": program_metadata,
         "university": {
             "university_id": str(program.university.university_id),
             "university_name": program.university.university_name,
@@ -172,9 +188,7 @@ def _course_to_dict(course: Course, *, include_dependencies: bool = False) -> di
         payload["prerequisites"] = [
             _prerequisite_to_dict(link) for link in course.prerequisite_links
         ]
-        payload["corequisites"] = [
-            _corequisite_to_dict(link) for link in course.corequisite_links
-        ]
+        payload["corequisites"] = [_corequisite_to_dict(link) for link in course.corequisite_links]
     return payload
 
 
@@ -201,6 +215,11 @@ def _course_summary_to_dict(course: Course) -> dict:
         "description": course.description,
         "metadata_json": metadata,
         "source_sequence": course.source_sequence,
+        "catalog_url": metadata.get("catalog_url"),
+        "credit_text": metadata.get("catalog_credit_text"),
+        "credits_min": metadata.get("credits_min"),
+        "credits_max": metadata.get("credits_max"),
+        "requirement_occurrences": metadata.get("requirement_occurrences") or [],
     }
 
 

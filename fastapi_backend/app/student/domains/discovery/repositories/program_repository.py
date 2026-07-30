@@ -6,8 +6,8 @@ from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
-from app.student.domains.discovery.models import Course, Program, University
 from app.shared.constants.institution import NORTHERN_NEW_MEXICO_COLLEGE_NAME
+from app.student.domains.discovery.models import Course, Program, University
 
 
 class ProgramRepository:
@@ -40,9 +40,7 @@ class ProgramRepository:
         result = await db.execute(statement.order_by(Program.program_name))
         return [_program_to_dict(program) for program in result.scalars().all()]
 
-    async def get_program_by_id(
-        self, db: AsyncSession, program_id: str
-    ) -> dict | None:
+    async def get_program_by_id(self, db: AsyncSession, program_id: str) -> dict | None:
         parsed_program_id = _parse_uuid(program_id)
         if parsed_program_id is None:
             return None
@@ -55,9 +53,7 @@ class ProgramRepository:
     async def search_programs(self, db: AsyncSession, query: str) -> list[dict]:
         return await self.get_programs(db, search=query)
 
-    async def get_programs_by_university(
-        self, db: AsyncSession, university_id: str
-    ) -> list[dict]:
+    async def get_programs_by_university(self, db: AsyncSession, university_id: str) -> list[dict]:
         return await self.get_programs(db, university_id=university_id)
 
 
@@ -69,9 +65,10 @@ def _program_query(*, include_courses: bool = False):
         select(Program)
         .options(*options)
         .where(
+            Program.metadata_json["is_current_catalog"].as_boolean().is_not(False),
             Program.university.has(
                 University.university_name.ilike(NORTHERN_NEW_MEXICO_COLLEGE_NAME)
-            )
+            ),
         )
     )
 
@@ -87,11 +84,18 @@ def _parse_uuid(value: str | uuid.UUID) -> uuid.UUID | None:
 
 def _program_to_dict(program: Program, *, include_courses: bool = False) -> dict:
     university = program.university
+    metadata = program.metadata_json or {}
+    intro = metadata.get("catalog_intro") or []
     payload = {
         "program_id": str(program.program_id),
         "program_name": program.program_name,
         "degree": program.degree,
         "total_credit_hours": program.total_credit_hours,
+        "catalog_title": metadata.get("catalog_title"),
+        "catalog_url": metadata.get("catalog_url"),
+        "catalog_year": metadata.get("catalog_year"),
+        "description": "\n\n".join(intro) if intro else None,
+        "metadata_json": metadata,
         "university": {
             "university_id": str(university.university_id),
             "university_name": university.university_name,
@@ -102,7 +106,11 @@ def _program_to_dict(program: Program, *, include_courses: bool = False) -> dict
     }
     if include_courses:
         courses = sorted(
-            program.courses,
+            [
+                course
+                for course in program.courses
+                if (course.metadata_json or {}).get("is_current_catalog") is not False
+            ],
             key=lambda course: (
                 course.recommended_year or 99,
                 course.recommended_semester or "",
@@ -115,6 +123,7 @@ def _program_to_dict(program: Program, *, include_courses: bool = False) -> dict
 
 
 def _course_summary_to_dict(course: Course) -> dict:
+    metadata = course.metadata_json or {}
     return {
         "course_id": str(course.course_id),
         "program_id": str(course.program_id),
@@ -131,6 +140,15 @@ def _course_summary_to_dict(course: Course) -> dict:
         "is_elective": course.is_elective,
         "default_plan_eligible": course.default_plan_eligible,
         "description": course.description,
+        "prerequisite": metadata.get("prerequisite"),
+        "corequisite": metadata.get("corequisite"),
+        "catalog_url": metadata.get("catalog_url"),
+        "credit_text": metadata.get("catalog_credit_text"),
+        "credits_min": metadata.get("credits_min"),
+        "credits_max": metadata.get("credits_max"),
+        "requirement_occurrences": metadata.get("requirement_occurrences") or [],
+        "metadata_json": metadata,
+        "source_sequence": course.source_sequence,
     }
 
 

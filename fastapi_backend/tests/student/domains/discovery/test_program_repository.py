@@ -71,6 +71,11 @@ def test_get_programs_returns_program_summaries():
             "program_name": "Computer Science",
             "degree": "Bachelor of Science",
             "total_credit_hours": 120,
+            "catalog_title": None,
+            "catalog_url": None,
+            "catalog_year": None,
+            "description": None,
+            "metadata_json": {},
             "university": {
                 "university_id": str(program.university.university_id),
                 "university_name": "Northern New Mexico College",

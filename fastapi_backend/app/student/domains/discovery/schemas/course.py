@@ -26,6 +26,11 @@ class CourseSummary(BaseModel):
     description: str | None = None
     metadata_json: dict | None = None
     source_sequence: int | None = None
+    catalog_url: str | None = None
+    credit_text: str | None = None
+    credits_min: int | None = None
+    credits_max: int | None = None
+    requirement_occurrences: list[dict] = Field(default_factory=list)
 
 
 class CoursePrerequisiteResponse(BaseModel):

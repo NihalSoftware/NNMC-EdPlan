@@ -26,27 +26,45 @@ const displayUniversityName = (name = "") => {
 	return isNorthernNewMexicoCollege(cleaned) ? INSTITUTION.name : cleaned;
 };
 
-const normalizeCourse = (course) => ({
-	id: course.course_id || course.id,
-	code: course.course_code || course.code,
-	name: course.course_name || course.name || course.courseName,
-	courseName: course.course_name || course.courseName || course.name,
-	credits: course.credits,
-	lecture_hours: course.lecture_hours,
-	lab_hours: course.lab_hours,
-	prerequisite: course.prerequisite || "",
-	corequisite: course.corequisite || "",
-	recommended_year:
-		YEAR_LABELS[course.recommended_year] ||
-		course.recommended_year ||
-		course.year ||
-		"Unassigned Year",
-	recommended_semester:
-		course.recommended_semester || course.semester || "Unassigned Semester",
-	is_elective: course.is_elective === true,
-	default_plan_eligible: course.default_plan_eligible === true,
-	description: course.description || "",
-});
+const normalizeCourse = (course) => {
+	const metadata = course.metadata_json || {};
+	const requirements =
+		course.requirement_occurrences || metadata.requirement_occurrences || [];
+
+	return {
+		id: course.course_id || course.id,
+		code: course.course_code || course.code,
+		name: course.course_name || course.name || course.courseName,
+		courseName: course.course_name || course.courseName || course.name,
+		credits: course.credits,
+		credits_min: course.credits_min ?? metadata.credits_min ?? course.credits,
+		credits_max: course.credits_max ?? metadata.credits_max ?? course.credits,
+		credit_text:
+			course.credit_text ||
+			metadata.catalog_credit_text ||
+			(course.credits == null ? "" : `${course.credits} CR`),
+		credit_contact_text: metadata.credit_contact_text || "",
+		lecture_hours:
+			metadata.lecture_hours_exact ?? course.lecture_hours,
+		lab_hours: metadata.lab_hours_exact ?? course.lab_hours,
+		prerequisite: course.prerequisite || metadata.prerequisite || "",
+		corequisite: course.corequisite || metadata.corequisite || "",
+		recommended_year:
+			YEAR_LABELS[course.recommended_year] ||
+			course.recommended_year ||
+			course.year ||
+			"Unassigned Year",
+		recommended_semester:
+			course.recommended_semester || course.semester || "Unassigned Semester",
+		is_elective: course.is_elective === true || metadata.is_elective === true,
+		default_plan_eligible: course.default_plan_eligible === true,
+		description: course.description || metadata.fields?.description || "",
+		catalog_url: course.catalog_url || metadata.catalog_url || "",
+		requirement_occurrences: requirements,
+		metadata_json: metadata,
+		source_sequence: course.source_sequence,
+	};
+};
 
 const groupCoursesByTerm = (courses = []) => {
 	const yearMap = new Map();
@@ -101,6 +119,16 @@ const normalizeProgram = (program, courses = []) => {
 		campus: universityName,
 		degree: program.degree || "",
 		total_credit_hours: program.total_credit_hours,
+		catalog_title:
+			program.catalog_title || program.metadata_json?.catalog_title || "",
+		catalog_url:
+			program.catalog_url || program.metadata_json?.catalog_url || "",
+		catalog_year:
+			program.catalog_year || program.metadata_json?.catalog_year || "",
+		description:
+			program.description ||
+			(program.metadata_json?.catalog_intro || []).join("\n\n"),
+		metadata_json: program.metadata_json || {},
 		college_profile: {
 			...(program.college_profile || {}),
 			university_id: university.university_id || program.university_id,

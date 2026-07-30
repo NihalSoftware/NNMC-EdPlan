@@ -70,6 +70,69 @@ const getSemesterRank = (semester) => {
 	return idx >= 0 ? idx + 1 : Number.MAX_SAFE_INTEGER;
 };
 
+const buildPlanTerms = (planCourses) => {
+	const terms = Array.from(
+		new Map(
+			(planCourses || []).map((course) => [
+				`${course.year}::${course.semester}`,
+				{
+					key: `${course.year}::${course.semester}`,
+					year: course.year,
+					semester: course.semester,
+				},
+			])
+		).values()
+	)
+		.sort((a, b) => {
+			const yearDiff = getYearRank(a.year) - getYearRank(b.year);
+			if (yearDiff !== 0) return yearDiff;
+			return getSemesterRank(a.semester) - getSemesterRank(b.semester);
+		})
+		.slice(0, MAX_SEMESTERS);
+
+	return terms.length ? terms : [buildGeneratedTerm(1)];
+};
+
+const buildDefaultPlanState = (
+	catalogCourses,
+	{ program, university }
+) => {
+	const defaultCourses = dedupeCourses(
+		(catalogCourses || [])
+			.filter((course) => {
+				const hasSuggestedTerm =
+					getYearRank(course.year) < Number.MAX_SAFE_INTEGER &&
+					getSemesterRank(course.semester) < Number.MAX_SAFE_INTEGER;
+				return (
+					course.default_plan_eligible ||
+					(!course.is_elective && hasSuggestedTerm)
+				);
+			})
+			.map((course) => ({
+				program,
+				university,
+				year: course.year,
+				semester: course.semester,
+				courseName: course.name,
+				code: course.code,
+				credits: course.credits,
+				prerequisite: course.prerequisite,
+				corequisite: course.corequisite,
+				schedule: course.schedule,
+			}))
+	);
+	const planTerms = buildPlanTerms(defaultCourses);
+	const termKeys = new Set(planTerms.map((term) => term.key));
+
+	return {
+		defaultCourses,
+		planTerms,
+		placedCourses: defaultCourses.filter((course) =>
+			termKeys.has(`${course.year}::${course.semester}`)
+		),
+	};
+};
+
 const buildGeneratedTerm = (termNumber) => {
 	const normalizedTermNumber = Math.max(1, Number(termNumber) || 1);
 	const yearIndex = Math.floor((normalizedTermNumber - 1) / 2);
@@ -231,6 +294,9 @@ const EducationPlanEditor = () => {
 	const [courses, setCourses] = useState([]);
 	const [availableCourses, setAvailableCourses] = useState([]);
 	const [defaultPlan, setDefaultPlan] = useState([]);
+	const [isProgramLoading, setIsProgramLoading] = useState(false);
+	const [programLoadError, setProgramLoadError] = useState("");
+	const [programLoadAttempt, setProgramLoadAttempt] = useState(0);
 	const [editingPlan, setEditingPlan] = useState(null);
 	const [editApplied, setEditApplied] = useState(false);
 	const [error, setError] = useState("");
@@ -238,9 +304,13 @@ const EducationPlanEditor = () => {
 	const [semesterFilter, setSemesterFilter] = useState("");
 	const [dependencyIssues, setDependencyIssues] = useState([]);
 	const [creditLimitModal, setCreditLimitModal] = useState(null);
-	const [expandedTerms, setExpandedTerms] = useState({});
-	const [planTerms, setPlanTerms] = useState([]);
-	const [activeTermKey, setActiveTermKey] = useState("");
+	const [expandedTerms, setExpandedTerms] = useState(() => ({
+		[buildGeneratedTerm(1).key]: true,
+	}));
+	const [planTerms, setPlanTerms] = useState(() => [buildGeneratedTerm(1)]);
+	const [activeTermKey, setActiveTermKey] = useState(
+		() => buildGeneratedTerm(1).key
+	);
 	const userEmail = loadStorage("UserEmail");
 	const profile = loadStorage("UserProfile") || {};
 	const navigate = useNavigate();
@@ -293,11 +363,15 @@ const EducationPlanEditor = () => {
 		let cancelled = false;
 
 		const resetSelectedProgramData = () => {
+			const initialTerm = buildGeneratedTerm(1);
 			setAvailableCourses([]);
 			setCourses([]);
 			setDefaultPlan([]);
-			setPlanTerms([]);
-			setActiveTermKey("");
+			setIsProgramLoading(false);
+			setProgramLoadError("");
+			setPlanTerms([initialTerm]);
+			setActiveTermKey(initialTerm.key);
+			setExpandedTerms({ [initialTerm.key]: true });
 		};
 
 		const loadSelectedProgramCourses = async () => {
@@ -328,54 +402,50 @@ const EducationPlanEditor = () => {
 				return;
 			}
 
-			let hydratedMatch = match;
-			const hasLoadedCourses = (match.years || []).some((entry) =>
-				(entry.semesters || []).some((semester) => (semester.courses || []).length > 0)
-			);
+			setIsProgramLoading(true);
+			setProgramLoadError("");
+			setAvailableCourses([]);
+			setCourses([]);
+			setDefaultPlan([]);
+			const loadingTerm = buildGeneratedTerm(1);
+			setPlanTerms([loadingTerm]);
+			setActiveTermKey(loadingTerm.key);
+			setExpandedTerms({ [loadingTerm.key]: true });
 
-			if (!hasLoadedCourses && match.program_id) {
-				try {
-					hydratedMatch = await getProgramWithCourses(match.program_id);
-					if (cancelled) return;
-					if (!hydratedMatch) {
-						resetSelectedProgramData();
-						return;
-					}
-					setPrograms((prev) =>
-						prev.map((program) =>
-							program.program_id === hydratedMatch.program_id
-								? { ...program, ...hydratedMatch }
-								: program
-						)
+			let hydratedMatch = null;
+			try {
+				hydratedMatch = await getProgramWithCourses(match.program_id);
+			} catch (err) {
+				console.error("Unable to load selected program courses", err);
+				if (!cancelled) {
+					setProgramLoadError(
+						"Unable to load the default plan. Check the NNMC catalog connection and try again."
 					);
-				} catch (err) {
-					console.error("Unable to load selected program courses", err);
-					if (!cancelled) {
-						setError("Unable to load program courses.");
-						resetSelectedProgramData();
-					}
-					return;
+				}
+				return;
+			} finally {
+				if (!cancelled) {
+					setIsProgramLoading(false);
 				}
 			}
-
 			if (cancelled) return;
+			if (!hydratedMatch) {
+				setProgramLoadError(
+					"The selected NNMC program did not return catalog courses."
+				);
+				return;
+			}
+
 			const uniqueCourses =
 				(hydratedMatch.years || []).flatMap((entry) =>
 					(entry.semesters || []).flatMap((semester) =>
 						(semester.courses || []).map((course) => ({
+							...course,
 							recommended_year: course.recommended_year || entry.year,
 							recommended_semester:
 								course.recommended_semester || semester.semester,
 							year: course.recommended_year || entry.year,
 							semester: course.recommended_semester || semester.semester,
-							code: course.code,
-							name: course.name,
-							credits: course.credits,
-							is_elective: course.is_elective,
-							default_plan_eligible: course.default_plan_eligible,
-							prerequisite: course.prerequisite,
-							corequisite: course.corequisite,
-							schedule: course.schedule,
 						}))
 					)
 				) || [];
@@ -383,46 +453,16 @@ const EducationPlanEditor = () => {
 			const cleanedCourses = dedupeCourses(uniqueCourses);
 			setAvailableCourses(cleanedCourses);
 
-			const builtDefaultPlan = dedupeCourses(
-				cleanedCourses
-					.filter((course) => course.default_plan_eligible)
-					.map((course) => ({
-						program: selectedProgram,
-						university: selectedUniversity,
-						year: course.year,
-						semester: course.semester,
-						courseName: course.name,
-						code: course.code,
-						credits: course.credits,
-						prerequisite: course.prerequisite,
-						corequisite: course.corequisite,
-						schedule: course.schedule,
-					}))
-			);
-			const defaultTerms = Array.from(
-				new Map(
-					builtDefaultPlan.map((course) => [
-						`${course.year}::${course.semester}`,
-						{
-							key: `${course.year}::${course.semester}`,
-							year: course.year,
-							semester: course.semester,
-						},
-					])
-				).values()
-			)
-				.sort((a, b) => {
-					const yearDiff = getYearRank(a.year) - getYearRank(b.year);
-					if (yearDiff !== 0) return yearDiff;
-					return getSemesterRank(a.semester) - getSemesterRank(b.semester);
-				})
-				.slice(0, MAX_SEMESTERS);
-			const defaultTermKeys = new Set(defaultTerms.map((term) => term.key));
-			const placedDefaultPlan = builtDefaultPlan.filter((course) =>
-				defaultTermKeys.has(`${course.year}::${course.semester}`)
-			);
+			const {
+				defaultCourses: builtDefaultPlan,
+				planTerms: defaultTerms,
+				placedCourses: placedDefaultPlan,
+			} = buildDefaultPlanState(cleanedCourses, {
+				program: selectedProgram,
+				university: selectedUniversity,
+			});
 			setDefaultPlan(builtDefaultPlan);
-			const degreeToUse = selectedDegree || hydratedMatch.degree || "";
+			const degreeToUse = hydratedMatch.degree || selectedDegree || "";
 			setSelectedDegree(degreeToUse);
 			saveStorage("ProgramDegree", degreeToUse);
 
@@ -468,7 +508,7 @@ const EducationPlanEditor = () => {
 			if (!editingMatch || !editApplied) {
 				setCourses(placedDefaultPlan);
 				setPlanTerms(defaultTerms);
-				setActiveTermKey(defaultTerms[0]?.key || "");
+				setActiveTermKey(defaultTerms[0].key);
 				setExpandedTerms(
 					Object.fromEntries(
 						defaultTerms.map((term, index) => [term.key, index < 2])
@@ -482,7 +522,15 @@ const EducationPlanEditor = () => {
 		return () => {
 			cancelled = true;
 		};
-	}, [programs, selectedProgram, selectedDegree, selectedUniversity, editingPlan, editApplied]);
+	}, [
+		programs,
+		selectedProgram,
+		selectedDegree,
+		selectedUniversity,
+		editingPlan,
+		editApplied,
+		programLoadAttempt,
+	]);
 
 	const knownCodes = useMemo(
 		() => buildCodeSet([...availableCourses, ...courses]),
@@ -493,7 +541,8 @@ const EducationPlanEditor = () => {
 		setDependencyIssues(validatePlan(courses, knownCodes));
 	}, [courses, knownCodes]);
 
-	// Filter programs based on selected university
+	// Filter programs based on selected university while retaining same-name
+	// programs at different degree levels.
 	const uniqueProgramOptions = useMemo(() => {
 		const seen = new Set();
 		let filteredPrograms = programs;
@@ -505,13 +554,17 @@ const EducationPlanEditor = () => {
 			);
 		}
 
-		// Remove duplicates
+		// Remove only duplicate records, not distinct degree programs.
 		return filteredPrograms.filter((program) => {
-			const name = (program.program || "").trim().toLowerCase();
-			if (!name || seen.has(name)) {
+			const identity =
+				program.program_id ||
+				`${(program.program || "").trim().toLowerCase()}::${normalizeDegree(
+					program.degree
+				)}`;
+			if (!program.program || seen.has(identity)) {
 				return false;
 			}
-			seen.add(name);
+			seen.add(identity);
 			return true;
 		});
 	}, [programs, selectedUniversity]);
@@ -663,14 +716,13 @@ const EducationPlanEditor = () => {
 		if (!selectedProgram || !selectedUniversity) return null;
 		const degreeNorm = normalizeDegree(selectedDegree);
 		if (degreeNorm) {
-			return (
-				programs.find(
+			const exactMatch = programs.find(
 					(entry) =>
 						entry.program === selectedProgram &&
 						entry.university === selectedUniversity &&
 						normalizeDegree(entry.degree) === degreeNorm
-				) || null
 			);
+			if (exactMatch) return exactMatch;
 		}
 		return (
 			programs.find(
@@ -689,13 +741,50 @@ const EducationPlanEditor = () => {
 
 	const programTotalCredits = selectedProgramMeta?.total_credit_hours ?? 0;
 
-	// Filter courses to only show those not already in the plan
-	const remainingCourses = useMemo(() => {
-		const addedCourseCodes = new Set(courses.map((course) => course.code));
-		return availableCourses.filter(
-			(course) => !addedCourseCodes.has(course.code)
-		);
-	}, [availableCourses, courses]);
+	const addedCourseCodes = useMemo(
+		() => new Set(courses.map((course) => course.code)),
+		[courses]
+	);
+
+	const groupedProgramCourses = useMemo(() => {
+		const groups = new Map();
+		availableCourses.forEach((course) => {
+			const occurrences = [...(course.requirement_occurrences || [])].sort(
+				(a, b) => (a.sequence || 0) - (b.sequence || 0)
+			);
+			const occurrence = occurrences[0] || {};
+			const path = occurrence.requirement_path || [];
+			const heading =
+				path[path.length - 1] || "Additional Program Courses";
+			const parentPath = path.slice(0, -1).join(" / ");
+			const key = `${parentPath}::${heading}`;
+			if (!groups.has(key)) {
+				groups.set(key, {
+					key,
+					heading,
+					parentPath,
+					sequence:
+						occurrence.sequence ??
+						course.source_sequence ??
+						Number.MAX_SAFE_INTEGER,
+					courses: [],
+				});
+			}
+			groups.get(key).courses.push(course);
+		});
+
+		return Array.from(groups.values())
+			.sort((a, b) => a.sequence - b.sequence)
+			.map((group) => ({
+				...group,
+				courses: group.courses.sort(
+					(a, b) =>
+						(a.source_sequence || Number.MAX_SAFE_INTEGER) -
+							(b.source_sequence || Number.MAX_SAFE_INTEGER) ||
+						String(a.code || "").localeCompare(String(b.code || ""))
+				),
+			}));
+	}, [availableCourses]);
 
 	const addSemester = () => {
 		if (!selectedProgram || !selectedUniversity) {
@@ -899,7 +988,7 @@ const EducationPlanEditor = () => {
 				}
 			}
 
-			toast.success("Successfully Added");
+			window.setTimeout(() => toast.success("Successfully Added"), 0);
 			return dedupeCourses([...prev, newEntry, ...extraCourses]);
 		});
 	};
@@ -937,9 +1026,13 @@ const EducationPlanEditor = () => {
 					.map((course) => course.code)
 					.filter(Boolean)
 					.join(", ");
-				toast.error(
-					`${target.code} and its co-requisite courses cannot be removed because they are prerequisites for ${dependentCodes}.` ,{duration: 60 * 1000,}
-
+				window.setTimeout(
+					() =>
+						toast.error(
+							`${target.code} and its co-requisite courses cannot be removed because they are prerequisites for ${dependentCodes}.`,
+							{ duration: 60 * 1000 }
+						),
+					0
 				);
 				return prev;
 			}
@@ -949,12 +1042,16 @@ const EducationPlanEditor = () => {
 				.filter(
 					(courseCode) => normalizeCourseCode(courseCode) !== targetCode
 				);
-			toast.success(
-				corequisiteCodes.length > 0
-					? `Removed ${target.code} with co-requisite${
-							corequisiteCodes.length === 1 ? "" : "s"
-						}: ${corequisiteCodes.join(", ")}.`
-					: `Removed ${target.code}.`
+			window.setTimeout(
+				() =>
+					toast.success(
+						corequisiteCodes.length > 0
+							? `Removed ${target.code} with co-requisite${
+									corequisiteCodes.length === 1 ? "" : "s"
+								}: ${corequisiteCodes.join(", ")}.`
+							: `Removed ${target.code}.`
+					),
+				0
 			);
 			return dedupeCourses(
 				prev.filter(
@@ -1124,7 +1221,7 @@ const EducationPlanEditor = () => {
 		termOptions.find((term) => term.key === activeTermKey) || termOptions[0];
 	const activeTermLabel = activeTermOption?.label || "No semester selected";
 	const dashboardContent = (
-		<div className="min-h-screen bg-slate-100 px-4 py-4 text-slate-900 sm:px-6 lg:px-8">
+		<div className="min-h-screen bg-slate-100 px-4 py-4 text-slate-900 sm:px-8 lg:px-8">
 			<div className="mx-auto max-w-none">
 				<header className="mb-4">
 					<h1 className="text-2xl font-semibold text-slate-950">
@@ -1138,7 +1235,7 @@ const EducationPlanEditor = () => {
 					</div>
 				)}
 
-				<div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_430px]">
+				<div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_550px]">
 					<aside className="space-y-4 xl:order-2">
 						<div className="hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
 							<div className="flex items-center gap-3">
@@ -1194,14 +1291,17 @@ const EducationPlanEditor = () => {
 								<h4 className="text-xs font-extrabold uppercase tracking-wide text-slate-500">
 									Program Course list
 								</h4>
-								<div className="flex items-center gap-2">
+								<div className="flex flex-wrap items-center gap-2">
 									<span className="rounded bg-slate-50 px-2 py-1 text-xs font-extrabold text-slate-500">
-										{remainingCourses.length}
+										{availableCourses.length}
 									</span>
 									<button
 										type="button"
 										onClick={savePlan}
-										disabled={dependencyIssues.some((issue) => issue.blocking)}
+										disabled={
+											isProgramLoading ||
+											dependencyIssues.some((issue) => issue.blocking)
+										}
 										className="rounded-md bg-indigo-600 px-4 py-3 text-m font-extrabold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
 									>
 										Save Your Plan
@@ -1211,33 +1311,125 @@ const EducationPlanEditor = () => {
 							<p className="mb-3 rounded-md bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700">
 								Adding to: {activeTermLabel}
 							</p>
-							<div className="max-h-[calc(100vh-260px)] space-y-2 overflow-y-auto pr-1">
-								{remainingCourses.length === 0 && (
-									<p className="rounded-md bg-slate-50 p-3 text-center text-sm font-semibold text-slate-500">
-										{availableCourses.length === 0
-											? "Select a program to create your Education Plan."
-											: "All courses have been added to your plan."}
+							{selectedProgramMeta?.catalog_url && (
+								<div className="mb-3 rounded-md border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800">
+									<p>
+										Verified against the NNMC {selectedProgramMeta.catalog_year || "current"} catalog.
+									</p>
+									<a
+										href={selectedProgramMeta.catalog_url}
+										target="_blank"
+										rel="noreferrer"
+										className="mt-1 inline-block font-extrabold text-blue-700 underline hover:text-blue-900"
+									>
+										View official program requirements
+									</a>
+								</div>
+							)}
+							<div className="max-h-[calc(100vh-320px)] space-y-4 overflow-y-auto pr-1">
+								{isProgramLoading && (
+									<p
+										role="status"
+										className="rounded-md bg-blue-50 p-3 text-center text-sm font-semibold text-blue-700"
+									>
+										Loading the default NNMC plan for {selectedProgram}…
 									</p>
 								)}
-								{remainingCourses.map((course) => (
-									<button
-										key={`${course.code}-${course.semester}`}
-										type="button"
-										onClick={() => addCourse(course)}
-										className="w-full rounded-md border border-slate-100 bg-white p-3 text-left shadow-sm transition hover:border-blue-200 hover:bg-blue-50"
-									>
-										<div className="flex items-start gap-2">
-											<div className="min-w-0 flex-1">
-												<p className="truncate text-sm font-extrabold text-slate-800">
-													{course.name}
-												</p>
-												<p className="mt-1 text-xs font-semibold text-slate-500">
-											{course.code} - {course.credits == null ? "Credits not reported" : `${course.credits} CR`}
-												</p>
-											</div>
-											<FaPlus className="mt-1 h-3 w-3 text-blue-700" />
+								{!isProgramLoading && programLoadError && (
+									<div className="rounded-md border border-rose-100 bg-rose-50 p-3 text-center text-sm font-semibold text-rose-700">
+										<p>{programLoadError}</p>
+										<button
+											type="button"
+											onClick={() =>
+												setProgramLoadAttempt((attempt) => attempt + 1)
+											}
+											className="mt-2 rounded bg-rose-700 px-3 py-1.5 text-xs font-extrabold text-white"
+										>
+											Retry default plan
+										</button>
+									</div>
+								)}
+								{!isProgramLoading &&
+									!programLoadError &&
+									availableCourses.length === 0 && (
+									<p className="rounded-md bg-slate-50 p-3 text-center text-sm font-semibold text-slate-500">
+										Select a program to view its official NNMC course requirements.
+									</p>
+								)}
+								{groupedProgramCourses.map((group) => (
+									<section key={group.key}>
+										{group.parentPath && (
+											<p className="mb-1 text-[11px] font-bold text-slate-400">
+												{group.parentPath}
+											</p>
+										)}
+										<h5 className="mb-2 border-b border-slate-200 pb-1 text-sm font-extrabold text-slate-900">
+											{group.heading}
+										</h5>
+										<div className="space-y-2">
+											{group.courses.map((course) => {
+												const isAdded = addedCourseCodes.has(course.code);
+												const creditLabel =
+													course.credit_text ||
+													(course.credits == null
+														? "Credits not reported"
+														: `${course.credits} CR`);
+												return (
+													<div
+														key={course.id || course.code}
+														className="rounded-md border border-slate-100 bg-white p-3 shadow-sm"
+													>
+														<div className="flex items-start">
+															<div className="min-w-0 flex-1">
+																{course.catalog_url ? (
+																	<a
+																		href={course.catalog_url}
+																		target="_blank"
+																		rel="noreferrer"
+																		className="text-sm font-extrabold text-blue-700 underline decoration-blue-200 underline-offset-2 hover:text-blue-900"
+																	>
+																		{course.code} - {course.name}
+																	</a>
+																) : (
+																	<p className="text-sm font-extrabold text-slate-800">
+																		{course.code} - {course.name}
+																	</p>
+																)}
+																<p className="mt-1 text-xs font-semibold text-slate-500">
+																	{creditLabel}
+																	{course.credit_contact_text
+																		? ` · ${course.credit_contact_text}`
+																		: ""}
+																</p>
+																{course.description && (
+																	<p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">
+																		{course.description}
+																	</p>
+																)}
+															</div>
+															<button
+																type="button"
+																onClick={() => addCourse(course)}
+																disabled={isAdded}
+																aria-label={
+																	isAdded
+																		? `${course.code} is already in the plan`
+																		: `Add ${course.code} to ${activeTermLabel}`
+																}
+																className="rounded p-2 text-blue-700 transition hover:bg-blue-50 disabled:cursor-default disabled:text-emerald-700"
+															>
+																{isAdded ? (
+																	<span className="text-[11px] font-extrabold">Added</span>
+																) : (
+																	<FaPlus className="h-3 w-3" />
+																)}
+															</button>
+														</div>
+													</div>
+												);
+											})}
 										</div>
-									</button>
+									</section>
 								))}
 							</div>
 						</div>
@@ -1268,19 +1460,20 @@ const EducationPlanEditor = () => {
 								<label className="block text-xs font-extrabold uppercase tracking-wide text-slate-400">
 									Program
 									<select
-										value={selectedProgram}
+										value={selectedProgramMeta?.program_id || ""}
 										onChange={(event) => {
-											setSelectedProgram(event.target.value);
-											saveStorage("Programname", event.target.value);
 											const found = programs.find(
-												(p) =>
-													p.program === event.target.value &&
-													p.university === selectedUniversity
+												(program) =>
+													program.program_id === event.target.value
 											);
 											if (found) {
+												setSelectedProgram(found.program);
+												saveStorage("Programname", found.program);
 												setSelectedDegree(found.degree || "");
 												saveStorage("ProgramDegree", found.degree || "");
 											} else {
+												setSelectedProgram("");
+												saveStorage("Programname", "");
 												setSelectedDegree("");
 												saveStorage("ProgramDegree", "");
 											}
@@ -1290,10 +1483,10 @@ const EducationPlanEditor = () => {
 										<option value="">Select Program</option>
 										{uniqueProgramOptions.map((program) => (
 											<option
-												key={`${program.university}-${program.program}`}
-												value={program.program}
+												key={program.program_id}
+												value={program.program_id}
 											>
-												{program.program}
+												{program.program} — {program.degree}
 											</option>
 										))}
 									</select>
@@ -1314,7 +1507,7 @@ const EducationPlanEditor = () => {
 									))}
 								</select>
 								<span className="rounded-md bg-blue-50 px-3 py-2 text-sm font-extrabold text-blue-700">
-									{totalCourses} courses
+									{isProgramLoading ? "Loading courses…" : `${totalCourses} courses`}
 								</span>
 								<span className="rounded-md bg-emerald-50 px-3 py-2 text-sm font-extrabold text-emerald-700">
 									{creditsProgressText}
@@ -1322,7 +1515,7 @@ const EducationPlanEditor = () => {
 								<span className="rounded-md bg-slate-50 px-3 py-2 text-sm font-bold text-slate-600">
 									Pre: {prereqProgramCount} / Co: {coreqProgramCount}
 								</span>
-								<div className="flex items-center gap-2">
+								<div className="flex flex-wrap items-center gap-2">
 									<select
 										value={activeTermOption?.key || ""}
 										onChange={(event) => {
@@ -1345,7 +1538,10 @@ const EducationPlanEditor = () => {
 									<button
 										type="button"
 										onClick={addSemester}
-										disabled={planTerms.length >= MAX_SEMESTERS}
+										disabled={
+											isProgramLoading ||
+											planTerms.length >= MAX_SEMESTERS
+										}
 										title={
 											planTerms.length >= MAX_SEMESTERS
 												? `Maximum of ${MAX_SEMESTERS} semesters reached`
@@ -1361,6 +1557,30 @@ const EducationPlanEditor = () => {
 								</div>
 							</div>
 						</div>
+
+						{isProgramLoading && (
+							<div
+								role="status"
+								className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm font-semibold text-blue-800 shadow-sm"
+							>
+								Loading and arranging the default NNMC education plan for {selectedProgram}…
+							</div>
+						)}
+
+						{!isProgramLoading && programLoadError && (
+							<div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 shadow-sm">
+								<p className="font-semibold">{programLoadError}</p>
+								<button
+									type="button"
+									onClick={() =>
+										setProgramLoadAttempt((attempt) => attempt + 1)
+									}
+									className="mt-3 rounded-md bg-rose-700 px-3 py-2 text-xs font-extrabold text-white"
+								>
+									Retry default plan
+								</button>
+							</div>
+						)}
 
 						{dependencyIssues.length > 0 && (
 							<div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 shadow-sm">
@@ -1384,7 +1604,8 @@ const EducationPlanEditor = () => {
 						)}
 
 						<div className="space-y-2">
-							{groupedCourseEntries.map(([groupKey, courseList, termNumber]) => {
+							{!isProgramLoading &&
+								groupedCourseEntries.map(([groupKey, courseList, termNumber]) => {
 								const [courseYear, courseSemester] = groupKey.split("::");
 								const displaySemester = getDisplaySemester(courseSemester, termNumber);
 								const semesterCredits = courseList.reduce((sum, course) => {
@@ -1429,7 +1650,7 @@ const EducationPlanEditor = () => {
 												{termNumber}
 											</span>
 											<div className="min-w-0 flex-1">
-												<h3 className="truncate text-sm font-extrabold text-slate-900">
+												<h3 className="text-sm font-extrabold text-slate-900">
 													Sem {termNumber}: {displaySemester}
 												</h3>
 												<p className="text-xs font-medium text-slate-500">
@@ -1478,7 +1699,7 @@ const EducationPlanEditor = () => {
 
 										{isExpanded && (
 											<div className="space-y-2 border-t border-slate-100 px-4 pb-4 pt-3">
-												{courseList.length === 0 && (
+												{courseList.length === 0 && !programLoadError && (
 													<div className="rounded-md border border-dashed border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-500">
 														Select this semester, then add subjects from the course catalog.
 													</div>
@@ -1566,7 +1787,7 @@ const EducationPlanEditor = () => {
 			{/* Credit Limit Modal */}
 			{creditLimitModal && (
 				<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-					<div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in duration-200">
+					<div className="bg-white rounded-2xl shadow-2xl max-w-md w-full space-y-4 animate-in fade-in zoom-in duration-200">
 						<div className="flex items-start gap-4">
 							<div className="flex-shrink-0 w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center">
 								<svg

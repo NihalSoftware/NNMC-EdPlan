@@ -3,13 +3,13 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-from sqlalchemy import bindparam, or_, select, text
+from sqlalchemy import bindparam, select, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.student.domains.discovery.models import Course, Program, University
 from app.shared.constants.institution import NORTHERN_NEW_MEXICO_COLLEGE_NAME
+from app.student.domains.discovery.models import Course, Program, University
 
 
 class ComparisonRepository:
@@ -32,7 +32,10 @@ class ComparisonRepository:
             statement = statement.where(University.university_name.ilike(term))
 
         result = await db.execute(statement.order_by(University.university_name).limit(limit))
-        return [_university_to_dict(university, include_programs=True) for university in result.scalars().all()]
+        return [
+            _university_to_dict(university, include_programs=True)
+            for university in result.scalars().all()
+        ]
 
     async def get_universities_by_ids(
         self,
@@ -75,7 +78,9 @@ class ComparisonRepository:
             statement = statement.where(Program.program_name.ilike(term))
 
         result = await db.execute(statement.order_by(Program.program_name).limit(limit))
-        return [_program_to_dict(program, include_courses=False) for program in result.scalars().all()]
+        return [
+            _program_to_dict(program, include_courses=False) for program in result.scalars().all()
+        ]
 
     async def get_programs_by_ids(
         self,
@@ -87,7 +92,9 @@ class ComparisonRepository:
         if not parsed_ids:
             return []
 
-        result = await db.execute(_program_query(include_courses=True).where(Program.program_id.in_(parsed_ids)))
+        result = await db.execute(
+            _program_query(include_courses=True).where(Program.program_id.in_(parsed_ids))
+        )
         programs = {
             program.program_id: _program_to_dict(program, include_courses=True)
             for program in result.scalars().all()
@@ -107,7 +114,9 @@ class ComparisonRepository:
         if not await _table_exists(db, "careers"):
             return {}
 
-        careers_by_program: dict[str, dict[str, dict]] = {str(program_id): {} for program_id in parsed_ids}
+        careers_by_program: dict[str, dict[str, dict]] = {
+            str(program_id): {} for program_id in parsed_ids
+        }
         if await _table_exists(db, "program_careers"):
             await self._add_program_careers(db, parsed_ids, careers_by_program)
         if await _table_exists(db, "course_careers"):
@@ -125,14 +134,12 @@ class ComparisonRepository:
         careers_by_program: dict[str, dict[str, dict]],
     ) -> None:
         result = await db.execute(
-            text(
-                """
+            text("""
                 SELECT pc.program_id, c.career_id, c.career_name, c.description
                 FROM program_careers pc
                 JOIN careers c ON c.career_id = pc.career_id
                 WHERE pc.program_id IN :program_ids
-                """
-            ).bindparams(bindparam("program_ids", expanding=True)),
+                """).bindparams(bindparam("program_ids", expanding=True)),
             {"program_ids": program_ids},
         )
         for row in result.mappings().all():
@@ -145,15 +152,13 @@ class ComparisonRepository:
         careers_by_program: dict[str, dict[str, dict]],
     ) -> None:
         result = await db.execute(
-            text(
-                """
+            text("""
                 SELECT co.program_id, cc.course_id, c.career_id, c.career_name, c.description
                 FROM course_careers cc
                 JOIN careers c ON c.career_id = cc.career_id
                 JOIN courses co ON co.course_id = cc.course_id
                 WHERE co.program_id IN :program_ids
-                """
-            ).bindparams(bindparam("program_ids", expanding=True)),
+                """).bindparams(bindparam("program_ids", expanding=True)),
             {"program_ids": program_ids},
         )
         for row in result.mappings().all():
@@ -176,9 +181,10 @@ def _program_query(*, include_courses: bool):
         select(Program)
         .options(*options)
         .where(
+            Program.metadata_json["is_current_catalog"].as_boolean().is_not(False),
             Program.university.has(
                 University.university_name.ilike(NORTHERN_NEW_MEXICO_COLLEGE_NAME)
-            )
+            ),
         )
     )
 
@@ -195,14 +201,12 @@ def _parse_uuid(value: str | uuid.UUID) -> uuid.UUID | None:
 async def _table_exists(db: AsyncSession, table_name: str) -> bool:
     try:
         result = await db.execute(
-            text(
-                """
+            text("""
                 SELECT 1
                 FROM information_schema.tables
                 WHERE table_name = :table_name
                 LIMIT 1
-                """
-            ),
+                """),
             {"table_name": table_name},
         )
     except SQLAlchemyError:
@@ -211,6 +215,11 @@ async def _table_exists(db: AsyncSession, table_name: str) -> bool:
 
 
 def _university_to_dict(university: University, *, include_programs: bool = False) -> dict:
+    current_programs = [
+        program
+        for program in university.programs or []
+        if (program.metadata_json or {}).get("is_current_catalog") is not False
+    ]
     payload = {
         "university_id": str(university.university_id),
         "university_name": university.university_name,
@@ -220,15 +229,25 @@ def _university_to_dict(university: University, *, include_programs: bool = Fals
         "state": university.state,
         "website": university.website,
         "public_private": None,
-        "catalog": {"has_programs": bool(university.programs), "program_count": len(university.programs or [])},
+        "catalog": {
+            "has_programs": bool(current_programs),
+            "program_count": len(current_programs),
+        },
     }
     if include_programs:
-        payload["available_programs"] = [_program_summary_to_dict(program) for program in sorted(university.programs or [], key=lambda item: (item.program_name, item.degree))]
+        payload["available_programs"] = [
+            _program_summary_to_dict(program)
+            for program in sorted(
+                current_programs,
+                key=lambda item: (item.program_name, item.degree),
+            )
+        ]
         payload["program_count"] = len(payload["available_programs"])
     return payload
 
 
 def _program_to_dict(program: Program, *, include_courses: bool = False) -> dict:
+    metadata = program.metadata_json or {}
     payload = _program_summary_to_dict(program)
     payload["university"] = {
         "university_id": str(program.university.university_id),
@@ -238,24 +257,42 @@ def _program_to_dict(program: Program, *, include_courses: bool = False) -> dict
         "website": program.university.website,
     }
     payload["duration"] = None
-    payload["description"] = None
+    payload["description"] = "\n\n".join(metadata.get("catalog_intro") or []) or None
+    payload["catalog_url"] = metadata.get("catalog_url")
+    payload["catalog_year"] = metadata.get("catalog_year")
     if include_courses:
-        courses = sorted(program.courses or [], key=lambda course: (course.recommended_year or 99, course.recommended_semester or "", course.course_code))
+        courses = sorted(
+            [
+                course
+                for course in program.courses or []
+                if (course.metadata_json or {}).get("is_current_catalog") is not False
+            ],
+            key=lambda course: (
+                course.recommended_year or 99,
+                course.recommended_semester or "",
+                course.course_code,
+            ),
+        )
         payload["required_courses"] = [_course_to_dict(course) for course in courses]
         payload["course_count"] = len(courses)
     return payload
 
 
 def _program_summary_to_dict(program: Program) -> dict:
+    metadata = program.metadata_json or {}
     return {
         "program_id": str(program.program_id),
         "program_name": program.program_name,
         "degree": program.degree,
         "total_credit_hours": program.total_credit_hours,
+        "catalog_title": metadata.get("catalog_title"),
+        "catalog_url": metadata.get("catalog_url"),
+        "catalog_year": metadata.get("catalog_year"),
     }
 
 
 def _course_to_dict(course: Course) -> dict:
+    metadata = course.metadata_json or {}
     return {
         "course_id": str(course.course_id),
         "course_code": course.course_code,
@@ -264,6 +301,9 @@ def _course_to_dict(course: Course) -> dict:
         "recommended_year": course.recommended_year,
         "recommended_semester": course.recommended_semester,
         "description": course.description,
+        "catalog_url": metadata.get("catalog_url"),
+        "credit_text": metadata.get("catalog_credit_text"),
+        "metadata_json": metadata,
     }
 
 

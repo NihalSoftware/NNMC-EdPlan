@@ -14,6 +14,11 @@ class ProgramSummary(BaseModel):
     program_name: str
     degree: str
     total_credit_hours: int
+    catalog_title: str | None = None
+    catalog_url: str | None = None
+    catalog_year: str | None = None
+    description: str | None = None
+    metadata_json: dict | None = None
     university: UniversitySummary
 
 
@@ -33,6 +38,15 @@ class CourseSummary(BaseModel):
     is_elective: bool = False
     default_plan_eligible: bool = False
     description: str | None = None
+    prerequisite: str | None = None
+    corequisite: str | None = None
+    catalog_url: str | None = None
+    credit_text: str | None = None
+    credits_min: int | None = None
+    credits_max: int | None = None
+    requirement_occurrences: list[dict] = Field(default_factory=list)
+    metadata_json: dict | None = None
+    source_sequence: int | None = None
 
 
 class ProgramDetail(ProgramSummary):
