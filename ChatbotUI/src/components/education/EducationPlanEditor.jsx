@@ -302,6 +302,7 @@ const EducationPlanEditor = () => {
 	const [error, setError] = useState("");
 	const [yearFilter, setYearFilter] = useState("");
 	const [semesterFilter, setSemesterFilter] = useState("");
+	const [courseListTab, setCourseListTab] = useState("core");
 	const [dependencyIssues, setDependencyIssues] = useState([]);
 	const [creditLimitModal, setCreditLimitModal] = useState(null);
 	const [expandedTerms, setExpandedTerms] = useState(() => ({
@@ -356,6 +357,7 @@ const EducationPlanEditor = () => {
 	useEffect(() => {
 		setYearFilter("");
 		setSemesterFilter("");
+		setCourseListTab("core");
 	}, [selectedProgram, selectedUniversity]);
 
 	// Update availableCourses when a program + university is selected.
@@ -785,6 +787,33 @@ const EducationPlanEditor = () => {
 				),
 			}));
 	}, [availableCourses]);
+
+	const courseListCounts = useMemo(
+		() =>
+			availableCourses.reduce(
+				(counts, course) => {
+					counts[course.is_elective ? "elective" : "core"] += 1;
+					return counts;
+				},
+				{ core: 0, elective: 0 }
+			),
+		[availableCourses]
+	);
+
+	const visibleProgramCourseGroups = useMemo(
+		() =>
+			groupedProgramCourses
+				.map((group) => ({
+					...group,
+					courses: group.courses.filter((course) =>
+						courseListTab === "elective"
+							? course.is_elective
+							: !course.is_elective
+					),
+				}))
+				.filter((group) => group.courses.length > 0),
+		[groupedProgramCourses, courseListTab]
+	);
 
 	const addSemester = () => {
 		if (!selectedProgram || !selectedUniversity) {
@@ -1315,7 +1344,44 @@ const EducationPlanEditor = () => {
 									</a>
 								</div>
 							)}
-							<div className="max-h-[calc(100vh-320px)] space-y-4 overflow-y-auto pr-1">
+							<div
+								className="mb-3 grid grid-cols-2 overflow-hidden border-b-4 border-blue-700"
+								role="tablist"
+								aria-label="Program course types"
+							>
+								{[
+									{ key: "core", label: "Core Courses" },
+									{ key: "elective", label: "Elective Courses" },
+								].map((tab) => {
+									const isActive = courseListTab === tab.key;
+									return (
+										<button
+											key={tab.key}
+											type="button"
+											role="tab"
+											aria-selected={isActive}
+											onClick={() => setCourseListTab(tab.key)}
+											className={`flex items-center justify-center gap-2 border-x border-t px-3 py-2.5 text-sm font-extrabold transition ${
+												isActive
+													? "border-blue-700 bg-blue-700 text-white"
+													: "border-slate-200 bg-slate-50 text-slate-700 hover:bg-blue-50 hover:text-blue-800"
+											}`}
+										>
+											{tab.label}
+											<span
+												className={`rounded-full px-2 py-0.5 text-[10px] ${
+													isActive
+														? "bg-white/20 text-white"
+														: "bg-slate-200 text-slate-600"
+												}`}
+											>
+												{courseListCounts[tab.key]}
+											</span>
+										</button>
+									);
+								})}
+							</div>
+							<div className="max-h-[calc(100vh-320px)] space-y-3 overflow-y-auto pr-1">
 								{isProgramLoading && (
 									<p
 										role="status"
@@ -1345,14 +1411,22 @@ const EducationPlanEditor = () => {
 										Select a program to view its official NNMC course requirements.
 									</p>
 								)}
-								{groupedProgramCourses.map((group) => (
+								{!isProgramLoading &&
+									!programLoadError &&
+									availableCourses.length > 0 &&
+									courseListCounts[courseListTab] === 0 && (
+										<p className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-center text-sm font-semibold text-slate-500">
+											No {courseListTab} courses are listed for this program.
+										</p>
+									)}
+								{visibleProgramCourseGroups.map((group) => (
 									<section key={group.key}>
 										{group.parentPath && (
-											<p className="mb-1 text-[11px] font-bold text-slate-400">
+											<p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
 												{group.parentPath}
 											</p>
 										)}
-										<h5 className="mb-2 border-b border-slate-200 pb-1 text-sm font-extrabold text-slate-900">
+										<h5 className="mb-2 border-b border-slate-200 pb-1 text-xs font-extrabold text-slate-700">
 											{group.heading}
 										</h5>
 										<div className="space-y-2">
@@ -1366,33 +1440,51 @@ const EducationPlanEditor = () => {
 												return (
 													<div
 														key={course.id || course.code}
-														className="rounded-md border border-slate-100 bg-white p-3 shadow-sm"
+														className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition hover:border-blue-200 hover:shadow-md"
 													>
-														<div className="flex items-start">
+														<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
 															<div className="min-w-0 flex-1">
 																{course.catalog_url ? (
 																	<a
 																		href={course.catalog_url}
 																		target="_blank"
 																		rel="noreferrer"
-																		className="text-sm font-extrabold text-blue-700 underline decoration-blue-200 underline-offset-2 hover:text-blue-900"
+																		className="text-sm font-black text-slate-900 hover:text-blue-700"
 																	>
-																		{course.code} - {course.name}
+																		{course.code} {course.name}
 																	</a>
 																) : (
-																	<p className="text-sm font-extrabold text-slate-800">
-																		{course.code} - {course.name}
+																	<p className="text-sm font-black text-slate-900">
+																		{course.code} {course.name}
 																	</p>
 																)}
-																<p className="mt-1 text-xs font-semibold text-slate-500">
-																	{creditLabel}
+																<div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+																	<span className="font-bold text-slate-700">
+																		{course.credits == null
+																			? creditLabel
+																			: `${course.credits} ${Number(course.credits) === 1 ? "Credit" : "Credits"}`}
+																	</span>
+																	<span
+																		className={`rounded px-2 py-1 text-[10px] font-extrabold text-white ${
+																			course.is_elective ? "bg-amber-500" : "bg-emerald-600"
+																		}`}
+																	>
+																		{course.is_elective ? "Elective" : "Core"}
+																	</span>
 																	{course.credit_contact_text
 																		? ` · ${course.credit_contact_text}`
 																		: ""}
-																</p>
-																{course.description && (
-																	<p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">
-																		{course.description}
+																</div>
+																{hasMeaningfulRequirement(course.prerequisite) && (
+																	<p className="mt-2 text-xs font-semibold text-slate-600">
+																		<span className="font-extrabold text-blue-700">Pre-req:</span>{" "}
+																		{course.prerequisite}
+																	</p>
+																)}
+																{hasMeaningfulRequirement(course.corequisite) && (
+																	<p className="mt-1 text-xs font-semibold text-slate-600">
+																		<span className="font-extrabold text-blue-700">Co-req:</span>{" "}
+																		{course.corequisite}
 																	</p>
 																)}
 															</div>
@@ -1405,12 +1497,22 @@ const EducationPlanEditor = () => {
 																		? `${course.code} is already in the plan`
 																		: `Add ${course.code} to ${activeTermLabel}`
 																}
-																className="rounded p-2 text-blue-700 transition hover:bg-blue-50 disabled:cursor-default disabled:text-emerald-700"
+																className={`inline-flex min-h-10 w-full shrink-0 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-extrabold transition sm:w-36 ${
+																	isAdded
+																		? "cursor-default border-emerald-200 bg-emerald-50 text-emerald-700"
+																		: "border-blue-700 bg-blue-700 text-white shadow-sm hover:bg-blue-800"
+																}`}
 															>
 																{isAdded ? (
-																	<span className="text-[11px] font-extrabold">Added</span>
+																	<span>Added to Plan</span>
 																) : (
-																	<FaPlus className="h-3 w-3" />
+																	<>
+																		
+																		
+																		
+																		
+																		Add to Semester
+																	</>
 																)}
 															</button>
 														</div>
