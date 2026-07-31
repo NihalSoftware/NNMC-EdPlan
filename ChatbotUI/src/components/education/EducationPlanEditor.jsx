@@ -1295,17 +1295,6 @@ const EducationPlanEditor = () => {
 									<span className="rounded bg-slate-50 px-2 py-1 text-xs font-extrabold text-slate-500">
 										{availableCourses.length}
 									</span>
-									<button
-										type="button"
-										onClick={savePlan}
-										disabled={
-											isProgramLoading ||
-											dependencyIssues.some((issue) => issue.blocking)
-										}
-										className="rounded-md bg-indigo-600 px-4 py-3 text-m font-extrabold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
-									>
-										Save Your Plan
-									</button>
 								</div>
 							</div>
 							<p className="mb-3 rounded-md bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700">
@@ -1535,25 +1524,38 @@ const EducationPlanEditor = () => {
 											))
 										)}
 									</select>
-									<button
-										type="button"
-										onClick={addSemester}
-										disabled={
-											isProgramLoading ||
-											planTerms.length >= MAX_SEMESTERS
-										}
-										title={
-											planTerms.length >= MAX_SEMESTERS
-												? `Maximum of ${MAX_SEMESTERS} semesters reached`
-												: "Add a semester"
-										}
-										className="inline-flex h-10 items-center gap-1.5 whitespace-nowrap rounded-lg bg-blue-700 px-3 text-xs font-extrabold text-white shadow-sm hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-									>
-										Add Semester
-										<span className="font-bold opacity-80">
-											({planTerms.length}/{MAX_SEMESTERS})
-										</span>
-									</button>
+									<div className="flex items-center gap-2">
+										<button
+											type="button"
+											onClick={addSemester}
+											disabled={
+												isProgramLoading ||
+												planTerms.length >= MAX_SEMESTERS
+											}
+											title={
+												planTerms.length >= MAX_SEMESTERS
+													? `Maximum of ${MAX_SEMESTERS} semesters reached`
+													: "Add a semester"
+											}
+											className="inline-flex h-10 items-center gap-1.5 whitespace-nowrap rounded-lg bg-blue-700 px-3 text-xs font-extrabold text-white shadow-sm hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+										>
+											Add Semester
+											<span className="font-bold opacity-80">
+												({planTerms.length}/{MAX_SEMESTERS})
+											</span>
+										</button>
+										<button
+											type="button"
+											onClick={savePlan}
+											disabled={
+												isProgramLoading ||
+												dependencyIssues.some((issue) => issue.blocking)
+											}
+											className="inline-flex h-10 items-center whitespace-nowrap rounded-lg bg-indigo-600 px-4 text-xs font-extrabold text-white shadow-sm hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+										>
+											Save Your Plan
+										</button>
+									</div>
 								</div>
 							</div>
 						</div>
