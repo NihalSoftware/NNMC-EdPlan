@@ -5,6 +5,7 @@ import {
 	FaBookOpen,
 	FaBuildingColumns,
 	FaClipboardList,
+	FaGraduationCap,
 	FaHouse,
 	FaRegBookmark,
 	FaRegCompass,
@@ -91,7 +92,7 @@ const Navigation = ({ open, setOpen }) => {
 						className="h-10 w-10 rounded-lg bg-white object-contain p-1"
 					/>
 					<div>
-						<h1 className="text-2xl font-black text-slate-950">NNMC</h1>
+						<p className="text-2xl font-black text-slate-950">NNMC</p>
 						<p className="text-xs font-semibold text-slate-500">
 							Northern New Mexico College
 						</p>
@@ -102,6 +103,7 @@ const Navigation = ({ open, setOpen }) => {
 			<nav className="flex flex-col gap-2 px-5 py-7">
 				<NavItem to="/home" label="Home" icon={FaHouse} onClick={closeMenu} />
 				<NavItem to="/career" label="Career and Program" icon={FaRegCompass} onClick={closeMenu} />
+				<NavItem to="/academics" label="Explore Programs" icon={FaGraduationCap} onClick={closeMenu} />
 				<NavItem to="/intake" label="Onboarding Form" icon={FaClipboardList} onClick={closeMenu} />
 				<NavItem to="/uni" label="NNMC Overview" icon={FaBuildingColumns} onClick={closeMenu} />
 				<NavItem to="/educationplan" label="Create Education Plan" icon={FaBookOpen} onClick={closeMenu} />

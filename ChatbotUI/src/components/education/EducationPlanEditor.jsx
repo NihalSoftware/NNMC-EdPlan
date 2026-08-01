@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
 	FaChevronDown,
 	FaChevronUp,
-	FaPlus,
 	FaTrash,
 } from "react-icons/fa";
 import { addEducationPlan } from "../../services/authService.js";

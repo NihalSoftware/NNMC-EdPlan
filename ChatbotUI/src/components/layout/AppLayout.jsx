@@ -26,7 +26,7 @@ const AppLayout = () => {
 							</span>
 						)}
 					</button>
-					<h1 className="text-xl font-bold text-slate-900">NNMC Student Hub</h1>
+					<p className="text-xl font-bold text-slate-900">NNMC Student Hub</p>
 					<div style={{ width: 40 }} />
 				</div>
 			</header>
