@@ -11,18 +11,14 @@ import {
 	AcademicResources,
 	AcademicStats,
 	AcademicsHero,
+	AcademicsPageNav,
 	EdPlanSteps,
-	InstitutionalCTA,
 } from "../components/academics/AcademicsSections.jsx";
 import ProgramExplorer from "../components/academics/ProgramExplorer.jsx";
-import {
-	ProgramComparisonBar,
-	ProgramComparisonDialog,
-} from "../components/academics/ProgramComparison.jsx";
-import { filterPrograms, toggleComparedProgram } from "../utils/programFilters.js";
+import { filterPrograms } from "../utils/programFilters.js";
 
 const META_DESCRIPTION =
-	"Discover academic programs, compare degree options and build a personalized semester-by-semester education plan with StudentSpace.ai and EdPlan AI.";
+	"Discover Northern New Mexico College academic programs and build a personalized semester-by-semester education plan with EdPlan AI.";
 
 const metadata = [
 	["name", "description", META_DESCRIPTION],
@@ -34,16 +30,12 @@ const metadata = [
 
 const AcademicsPage = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
-	const [comparedIds, setComparedIds] = useState([]);
 	const [addedIds, setAddedIds] = useState([]);
-	const [comparisonOpen, setComparisonOpen] = useState(false);
 	const filters = useMemo(
 		() => ({
 			query: searchParams.get("q") ?? "",
 			area: searchParams.get("area") ?? "",
 			degreeType: searchParams.get("degree") ?? "",
-			delivery: searchParams.get("format") ?? "",
-			location: searchParams.get("location") ?? "",
 		}),
 		[searchParams]
 	);
@@ -51,11 +43,6 @@ const AcademicsPage = () => {
 		() => filterPrograms(ACADEMIC_PROGRAMS, filters),
 		[filters]
 	);
-	const comparedPrograms = useMemo(
-		() => comparedIds.map((id) => ACADEMIC_PROGRAMS.find((program) => program.id === id)).filter(Boolean),
-		[comparedIds]
-	);
-
 	useEffect(() => {
 		const previousTitle = document.title;
 		const previousMetadata = metadata.map(([attribute, key, content]) => {
@@ -88,8 +75,6 @@ const AcademicsPage = () => {
 				query: "q",
 				area: "area",
 				degreeType: "degree",
-				delivery: "format",
-				location: "location",
 			};
 			const parameter = parameterByFilter[key];
 			const next = new URLSearchParams(searchParams);
@@ -100,10 +85,6 @@ const AcademicsPage = () => {
 		[searchParams, setSearchParams]
 	);
 
-	const handleToggleCompare = useCallback((programId) => {
-		setComparedIds((selectedIds) => toggleComparedProgram(selectedIds, programId));
-	}, []);
-
 	const handleToggleAdded = useCallback((programId) => {
 		setAddedIds((selectedIds) =>
 			selectedIds.includes(programId)
@@ -112,11 +93,10 @@ const AcademicsPage = () => {
 		);
 	}, []);
 
-	const closeComparison = useCallback(() => setComparisonOpen(false), []);
-
 	return (
-		<div className={`min-h-screen overflow-x-hidden bg-slate-50 ${comparedPrograms.length >= 2 ? "pb-80 sm:pb-40" : ""}`}>
+		<div className="min-h-screen overflow-x-clip bg-white">
 			<AcademicsHero />
+			<AcademicsPageNav />
 			<AcademicStats stats={ACADEMIC_STATS} />
 			<ProgramExplorer
 				programs={ACADEMIC_PROGRAMS}
@@ -125,25 +105,11 @@ const AcademicsPage = () => {
 				filters={filters}
 				onFilterChange={handleFilterChange}
 				onClearFilters={() => setSearchParams({}, { replace: true })}
-				comparedIds={comparedIds}
-				onToggleCompare={handleToggleCompare}
 				addedIds={addedIds}
 				onToggleAdded={handleToggleAdded}
 			/>
 			<EdPlanSteps steps={EDPLAN_STEPS} />
 			<AcademicResources resources={ACADEMIC_RESOURCES} />
-			<InstitutionalCTA />
-			<ProgramComparisonBar
-				programs={comparedPrograms}
-				onRemove={handleToggleCompare}
-				onClear={() => setComparedIds([])}
-				onCompare={() => setComparisonOpen(true)}
-			/>
-			<ProgramComparisonDialog
-				programs={comparedPrograms}
-				open={comparisonOpen}
-				onClose={closeComparison}
-			/>
 		</div>
 	);
 };
