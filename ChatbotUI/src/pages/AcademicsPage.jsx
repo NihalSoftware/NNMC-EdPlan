@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
 	ACADEMIC_PROGRAMS,
@@ -11,7 +11,6 @@ import {
 	AcademicResources,
 	AcademicStats,
 	AcademicsHero,
-	AcademicsPageNav,
 	EdPlanSteps,
 } from "../components/academics/AcademicsSections.jsx";
 import ProgramExplorer from "../components/academics/ProgramExplorer.jsx";
@@ -22,15 +21,14 @@ const META_DESCRIPTION =
 
 const metadata = [
 	["name", "description", META_DESCRIPTION],
-	["property", "og:title", "Explore Academic Programs and Education Plans | StudentSpace.ai"],
+	["property", "og:title", "Academics | Northern New Mexico College"],
 	["property", "og:description", META_DESCRIPTION],
-	["name", "twitter:title", "Explore Academic Programs and Education Plans | StudentSpace.ai"],
+	["name", "twitter:title", "Academics | Northern New Mexico College"],
 	["name", "twitter:description", META_DESCRIPTION],
 ];
 
 const AcademicsPage = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
-	const [addedIds, setAddedIds] = useState([]);
 	const filters = useMemo(
 		() => ({
 			query: searchParams.get("q") ?? "",
@@ -58,7 +56,7 @@ const AcademicsPage = () => {
 			return { element, created, previousContent };
 		});
 
-		document.title = "Explore Academic Programs and Education Plans | StudentSpace.ai";
+		document.title = "Academics | Northern New Mexico College";
 		return () => {
 			document.title = previousTitle;
 			previousMetadata.forEach(({ element, created, previousContent }) => {
@@ -85,18 +83,9 @@ const AcademicsPage = () => {
 		[searchParams, setSearchParams]
 	);
 
-	const handleToggleAdded = useCallback((programId) => {
-		setAddedIds((selectedIds) =>
-			selectedIds.includes(programId)
-				? selectedIds.filter((id) => id !== programId)
-				: [...selectedIds, programId]
-		);
-	}, []);
-
 	return (
 		<div className="min-h-screen overflow-x-clip bg-white">
 			<AcademicsHero />
-			<AcademicsPageNav />
 			<AcademicStats stats={ACADEMIC_STATS} />
 			<ProgramExplorer
 				programs={ACADEMIC_PROGRAMS}
@@ -105,8 +94,6 @@ const AcademicsPage = () => {
 				filters={filters}
 				onFilterChange={handleFilterChange}
 				onClearFilters={() => setSearchParams({}, { replace: true })}
-				addedIds={addedIds}
-				onToggleAdded={handleToggleAdded}
 			/>
 			<EdPlanSteps steps={EDPLAN_STEPS} />
 			<AcademicResources resources={ACADEMIC_RESOURCES} />

@@ -14,8 +14,6 @@ const ProgramExplorer = ({
 	filters,
 	onFilterChange,
 	onClearFilters,
-	addedIds,
-	onToggleAdded,
 }) => {
 	const [filtersOpen, setFiltersOpen] = useState(false);
 	const degreeTypes = useMemo(() => uniqueSortedValues(programs, "degreeType"), [programs]);
@@ -134,8 +132,6 @@ const ProgramExplorer = ({
 								<ProgramCard
 									key={program.id}
 									program={program}
-									isAdded={addedIds.includes(program.id)}
-									onToggleAdded={onToggleAdded}
 								/>
 							))}
 						</div>

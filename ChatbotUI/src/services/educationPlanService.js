@@ -125,6 +125,10 @@ const normalizeProgram = (program, courses = []) => {
 			program.catalog_url || program.metadata_json?.catalog_url || "",
 		catalog_year:
 			program.catalog_year || program.metadata_json?.catalog_year || "",
+		catalog_program_id:
+			program.catalog_program_id ||
+			program.metadata_json?.catalog_program_id ||
+			"",
 		description:
 			program.description ||
 			(program.metadata_json?.catalog_intro || []).join("\n\n"),

@@ -181,7 +181,7 @@ const FindUniversity = () => {
 								<p className="font-semibold text-slate-900">{formatAdmission(institution)}</p>
 							</div>
 							<div className="rounded-lg bg-slate-50 p-3">
-								<p className="text-xs font-semibold uppercase text-slate-500">Average annual net price</p>
+								<p className="text-xs font-semibold uppercase text-slate-500">Average annual net Fee</p>
 								<p className="font-semibold text-slate-900">
 									{formatCurrency(institution.average_annual_cost)}
 								</p>

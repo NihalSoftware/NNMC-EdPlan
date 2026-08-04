@@ -34,38 +34,6 @@ const iconByName = {
 const sectionLabelClass =
 	"text-sm font-black uppercase tracking-[0.2em] text-[#c95f22]";
 
-const primaryLinkClass =
-	"inline-flex min-h-12 items-center justify-center gap-2 bg-[#c95f22] px-6 py-3 text-sm font-black uppercase tracking-[0.08em] text-white transition hover:bg-[#a94716] focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-200";
-
-const academicsPageLinks = [
-	["Overview", "#academic-overview"],
-	["Areas of Study", "#areas-of-interest"],
-	["Find Programs", "#program-search"],
-	["Planning Process", "#planning-process"],
-	["Student Resources", "#student-resources"],
-];
-
-export const AcademicsPageNav = () => (
-	<nav aria-label="Academics section navigation" className="relative z-10 border-b border-white/15 bg-[#073b5c] text-white shadow-lg">
-		<div className="mx-auto flex max-w-6xl items-center px-5 sm:px-8 xl:px-0">
-			<span className="hidden shrink-0 border-r border-white/20 py-4 pr-6 text-xs font-black uppercase tracking-[0.16em] text-orange-200 lg:block">
-				On this page
-			</span>
-			<div className="flex min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:pl-3">
-				{academicsPageLinks.map(([label, href]) => (
-					<a
-						key={href}
-						href={href}
-						className="shrink-0 border-b-4 border-transparent px-4 py-4 text-sm font-black uppercase tracking-[0.06em] text-white/85 transition hover:border-[#c95f22] hover:bg-white/5 hover:text-white focus:outline-none focus-visible:bg-white/10"
-					>
-						{label}
-					</a>
-				))}
-			</div>
-		</div>
-	</nav>
-);
-
 export const AcademicsHero = () => (
 	<section className="relative isolate flex min-h-[28rem] items-end overflow-hidden bg-[#082a40] text-white sm:min-h-[34rem]">
 		<img
@@ -101,12 +69,6 @@ export const AcademicStats = ({ stats }) => (
 					<p>
 						Review requirements and outcomes, then turn the right program into a practical semester-by-semester education plan.
 					</p>
-					<div className="flex flex-col gap-3 pt-2 sm:flex-row">
-						<a href="#program-explorer" className={primaryLinkClass}>Explore Programs <FaArrowRight aria-hidden="true" /></a>
-						<Link to="/educationplan" className="inline-flex min-h-12 items-center justify-center gap-2 border-2 border-[#073b5c] px-6 py-3 text-sm font-black uppercase tracking-[0.08em] text-[#073b5c] transition hover:bg-[#073b5c] hover:text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-200">
-							<FaBookOpen aria-hidden="true" /> Build My Plan
-						</Link>
-					</div>
 				</div>
 			</div>
 

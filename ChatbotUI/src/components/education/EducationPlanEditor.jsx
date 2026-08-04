@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
 	FaChevronDown,
 	FaChevronUp,
@@ -14,6 +14,7 @@ import {
 	load as loadStorage,
 	save as saveStorage,
 } from "../../utils/storage.js";
+import { findProgramByCatalogId } from "../../utils/catalogProgramSelection.js";
 import toast from "react-hot-toast";
 import {
 	INSTITUTION,
@@ -314,6 +315,8 @@ const EducationPlanEditor = () => {
 	const userEmail = loadStorage("UserEmail");
 	const profile = loadStorage("UserProfile") || {};
 	const navigate = useNavigate();
+	const [searchParams] = useSearchParams();
+	const requestedCatalogProgramId = searchParams.get("catalogProgram") || "";
 
 	useEffect(() => {
 		saveStorage("University", INSTITUTION.name);
@@ -326,10 +329,14 @@ const EducationPlanEditor = () => {
 				setError("Unable to load program catalog.");
 			});
 		// Load program from storage on mount (keep university even if program is missing)
-		const savedProgram = loadStorage("Programname", "");
+		const savedProgram = requestedCatalogProgramId
+			? ""
+			: loadStorage("Programname", "");
 		setSelectedProgram(savedProgram || "");
-		const savedDegree =
-			loadStorage("ProgramDegree", "") || loadStorage("SelectedDegreeLevel", "");
+		const savedDegree = requestedCatalogProgramId
+			? ""
+			: loadStorage("ProgramDegree", "") ||
+				loadStorage("SelectedDegreeLevel", "");
 		if (savedDegree) {
 			setSelectedDegree(savedDegree);
 		}
@@ -344,7 +351,28 @@ const EducationPlanEditor = () => {
 		} else if (editingActive) {
 			saveStorage("EditingPlanActive", false);
 		}
-	}, []);
+	}, [requestedCatalogProgramId]);
+
+	useEffect(() => {
+		if (!requestedCatalogProgramId || programs.length === 0) return;
+
+		const requestedProgram = findProgramByCatalogId(
+			programs,
+			requestedCatalogProgramId
+		);
+		if (!requestedProgram) {
+			setError("The selected NNMC catalog program is unavailable.");
+			return;
+		}
+
+		setError("");
+		setSelectedProgram(requestedProgram.program);
+		setSelectedDegree(requestedProgram.degree || "");
+		saveStorage("Programname", requestedProgram.program);
+		saveStorage("SelectedProgram", requestedProgram.program);
+		saveStorage("ProgramDegree", requestedProgram.degree || "");
+		saveStorage("SelectedDegreeLevel", requestedProgram.degree || "");
+	}, [programs, requestedCatalogProgramId]);
 
 	// When no program is selected, clear available courses
 	useEffect(() => {
