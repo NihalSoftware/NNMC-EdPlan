@@ -103,7 +103,8 @@ const Navigation = ({ open, setOpen }) => {
 			<nav className="flex flex-col gap-2 px-5 py-7">
 				<NavItem to="/home" label="Home" icon={FaHouse} onClick={closeMenu} />
 				<NavItem to="/career" label="Career and Program" icon={FaRegCompass} onClick={closeMenu} />
-				<NavItem to="/academics" label="Explore Programs" icon={FaGraduationCap} onClick={closeMenu} />
+				<NavItem to="/academics" label="Academics" icon={FaGraduationCap} onClick={closeMenu} />
+				<NavItem to="/programs" label="Explore Programs" icon={FaGraduationCap} onClick={closeMenu} />
 				<NavItem to="/intake" label="Onboarding Form" icon={FaClipboardList} onClick={closeMenu} />
 				<NavItem to="/uni" label="NNMC Overview" icon={FaBuildingColumns} onClick={closeMenu} />
 				<NavItem to="/educationplan" label="Create Education Plan" icon={FaBookOpen} onClick={closeMenu} />

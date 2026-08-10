@@ -1,115 +1,159 @@
-import { useMemo, useState } from "react";
-import { FaFilter, FaMagnifyingGlass, FaXmark } from "react-icons/fa6";
-import { AreaOfInterestGrid } from "./AcademicsSections.jsx";
+import { useCallback, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
+import { FaMagnifyingGlass, FaXmark } from "react-icons/fa6";
 import ProgramCard from "./ProgramCard.jsx";
-import { uniqueSortedValues } from "../../utils/programFilters.js";
+import {
+	ACADEMIC_PROGRAMS,
+	AREAS_OF_INTEREST,
+} from "../../data/academicPrograms.js";
+import {
+	filterPrograms,
+	uniqueSortedValues,
+} from "../../utils/programFilters.js";
+
+const META_DESCRIPTION =
+	"Explore Northern New Mexico College programs by area of interest and credential, then add a selected program to your education plan.";
+
+const metadata = [
+	["name", "description", META_DESCRIPTION],
+	["property", "og:title", "Explore Programs | Northern New Mexico College"],
+	["property", "og:description", META_DESCRIPTION],
+	["name", "twitter:title", "Explore Programs | Northern New Mexico College"],
+	["name", "twitter:description", META_DESCRIPTION],
+];
 
 const selectClass =
-	"mt-2 min-h-12 w-full border border-slate-300 bg-white px-3 py-2.5 text-sm font-bold text-slate-800 outline-none transition focus:border-[#c95f22] focus:ring-4 focus:ring-orange-100";
+	"mt-1.5 h-11 w-full border border-slate-300 bg-white px-3 text-sm font-bold normal-case tracking-normal text-slate-800 outline-none transition focus:border-[#c95f22] focus:ring-4 focus:ring-orange-100";
 
-const ProgramExplorer = ({
-	programs,
-	filteredPrograms,
-	areas,
-	filters,
-	onFilterChange,
-	onClearFilters,
-}) => {
-	const [filtersOpen, setFiltersOpen] = useState(false);
-	const degreeTypes = useMemo(() => uniqueSortedValues(programs, "degreeType"), [programs]);
-	const programCounts = useMemo(
-		() =>
-			programs.reduce((counts, program) => {
-				counts[program.area] = (counts[program.area] ?? 0) + 1;
-				return counts;
-			}, {}),
-		[programs]
+const ProgramExplorer = () => {
+	const [searchParams, setSearchParams] = useSearchParams();
+	const filters = useMemo(
+		() => ({
+			query: searchParams.get("q") ?? "",
+			area: searchParams.get("area") ?? "",
+			degreeType: searchParams.get("degree") ?? "",
+		}),
+		[searchParams]
 	);
-	const handleAreaSelect = (area) => {
-		onFilterChange("area", area);
-		document.getElementById("program-results-heading")?.scrollIntoView({ block: "start" });
-	};
+	const filteredPrograms = useMemo(
+		() => filterPrograms(ACADEMIC_PROGRAMS, filters),
+		[filters]
+	);
+	const degreeTypes = useMemo(
+		() => uniqueSortedValues(ACADEMIC_PROGRAMS, "degreeType"),
+		[]
+	);
+
+	useEffect(() => {
+		const previousTitle = document.title;
+		const previousMetadata = metadata.map(([attribute, key, content]) => {
+			let element = document.head.querySelector(`meta[${attribute}="${key}"]`);
+			const created = !element;
+			if (!element) {
+				element = document.createElement("meta");
+				element.setAttribute(attribute, key);
+				document.head.appendChild(element);
+			}
+			const previousContent = element.getAttribute("content");
+			element.setAttribute("content", content);
+			return { element, created, previousContent };
+		});
+
+		document.title = "Explore Programs | Northern New Mexico College";
+		return () => {
+			document.title = previousTitle;
+			previousMetadata.forEach(({ element, created, previousContent }) => {
+				if (created) element.remove();
+				else if (previousContent === null) element.removeAttribute("content");
+				else element.setAttribute("content", previousContent);
+			});
+		};
+	}, []);
+
+	const handleFilterChange = useCallback(
+		(key, value) => {
+			const parameterByFilter = {
+				query: "q",
+				area: "area",
+				degreeType: "degree",
+			};
+			const parameter = parameterByFilter[key];
+			const next = new URLSearchParams(searchParams);
+			if (value) next.set(parameter, value);
+			else next.delete(parameter);
+			setSearchParams(next, { replace: true });
+		},
+		[searchParams, setSearchParams]
+	);
+
+	const handleClearFilters = useCallback(
+		() => setSearchParams({}, { replace: true }),
+		[setSearchParams]
+	);
 
 	return (
-		<section id="program-explorer" aria-labelledby="program-explorer-heading" className="scroll-mt-4 bg-[#f7f9fa] px-5 py-16 sm:px-8 sm:py-20 xl:px-12">
+		<div className="min-h-screen overflow-x-clip bg-[#f7f9fa]">
+			<h1 className="sr-only">Explore Programs</h1>
+			<section id="program-explorer" aria-labelledby="program-explorer-heading" className="scroll-mt-4 bg-[#f7f9fa] px-5 py-16 sm:px-8 sm:py-20 xl:px-12">
 			<div className="mx-auto max-w-6xl">
-				<AreaOfInterestGrid
-					areas={areas}
-					programCounts={programCounts}
-					activeArea={filters.area}
-					onSelectArea={handleAreaSelect}
-				/>
-
-				<div id="program-search" className="mt-20 scroll-mt-20 max-w-3xl border-t-4 border-[#c95f22] pt-8">
+				<div id="program-search" className="scroll-mt-20 max-w-5xl border-t-4 border-[#c95f22] pt-8">
 					<p className="text-sm font-black uppercase tracking-[0.2em] text-[#c95f22]">Program discovery</p>
 					<h2 id="program-explorer-heading" className="mt-3 text-4xl font-semibold tracking-tight text-[#073b5c] sm:text-5xl">
-						Find a program that fits your next step
+						Find Your Best-Fit Program
 					</h2>
-					<p className="mt-4 text-lg leading-8 text-slate-600">
-						Search Northern&rsquo;s catalog, then refine by area of interest or credential.
+					<p className="mt-4 text-xl  text-[#073b5c]">
+						Explore Northern’s programs by area of interest or degrees awarded and find the right fit for your goals.
+
 					</p>
 				</div>
 
-				<div className="mt-8 border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5 sm:p-7">
-					<div className="flex flex-col gap-4 lg:flex-row lg:items-end">
-						<label className="min-w-0 flex-1 text-sm font-black text-slate-700">
-							Keyword search
-							<span className="relative mt-2 block">
-								<FaMagnifyingGlass aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+				<div
+					role="search"
+					aria-label="Program filters"
+					className="mt-6 border border-slate-200 bg-white p-4 shadow-sm"
+				>
+					<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
+						<label className="min-w-0 text-xs font-black uppercase tracking-wide text-slate-600">
+							Program search
+							<span className="relative mt-1.5 block">
+								<FaMagnifyingGlass aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
 								<input
 									type="search"
 									value={filters.query}
-									onChange={(event) => onFilterChange("query", event.target.value)}
-									placeholder="Search by program, major, career or keyword"
-									className="min-h-12 w-full border border-slate-300 py-2.5 pl-11 pr-4 text-base font-medium text-slate-900 outline-none transition placeholder:font-normal placeholder:text-slate-400 focus:border-[#c95f22] focus:ring-4 focus:ring-orange-100"
+									onChange={(event) => handleFilterChange("query", event.target.value)}
+									placeholder="Search programs"
+									className="h-11 w-full border border-slate-300 py-2 pl-9 pr-3 text-sm font-semibold normal-case tracking-normal text-slate-900 outline-none transition placeholder:font-normal placeholder:text-slate-400 focus:border-[#c95f22] focus:ring-4 focus:ring-orange-100"
 								/>
 							</span>
 						</label>
-						<div className="flex gap-3">
-							<button
-								type="button"
-								onClick={() => setFiltersOpen((value) => !value)}
-								aria-expanded={filtersOpen}
-								aria-controls="program-filter-controls"
-								className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 border border-slate-300 px-4 py-2.5 font-black text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 md:hidden"
-							>
-								<FaFilter aria-hidden="true" /> Filters
-							</button>
-							<button
-								type="button"
-								onClick={onClearFilters}
-								className="inline-flex min-h-12 items-center justify-center gap-2 border border-slate-300 px-4 py-2.5 font-black text-slate-700 hover:border-orange-200 hover:bg-orange-50 hover:text-[#a94716] focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-100"
-							>
-								<FaXmark aria-hidden="true" /> Clear filters
-							</button>
-						</div>
-					</div>
-
-					<div
-						id="program-filter-controls"
-						className={`${filtersOpen ? "grid" : "hidden"} mt-6 gap-4 border-t border-slate-100 pt-6 md:grid md:grid-cols-2`}
-					>
-						<label className="text-sm font-black text-slate-700">
+						<label className="min-w-0 text-xs font-black uppercase tracking-wide text-slate-600">
 							Area of interest
-							<select value={filters.area} onChange={(event) => onFilterChange("area", event.target.value)} className={selectClass}>
+							<select value={filters.area} onChange={(event) => handleFilterChange("area", event.target.value)} className={selectClass}>
 								<option value="">All areas</option>
-								{areas.map((area) => <option key={area.id} value={area.title}>{area.title}</option>)}
+								{AREAS_OF_INTEREST.map((area) => <option key={area.id} value={area.title}>{area.title}</option>)}
 							</select>
 						</label>
-						<label className="text-sm font-black text-slate-700">
+						<label className="min-w-0 text-xs font-black uppercase tracking-wide text-slate-600">
 							Degree type
-							<select value={filters.degreeType} onChange={(event) => onFilterChange("degreeType", event.target.value)} className={selectClass}>
+							<select value={filters.degreeType} onChange={(event) => handleFilterChange("degreeType", event.target.value)} className={selectClass}>
 								<option value="">All degree types</option>
 								{degreeTypes.map((degreeType) => <option key={degreeType} value={degreeType}>{degreeType}</option>)}
 							</select>
 						</label>
+						<button
+							type="button"
+							onClick={handleClearFilters}
+							aria-label="Clear filters"
+							className="inline-flex h-11 items-center justify-center gap-2 border border-slate-300 px-3 text-sm font-black text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-[#a94716] focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-100 sm:col-span-2 lg:col-span-1"
+						>
+							<FaXmark aria-hidden="true" /> Clear
+						</button>
 					</div>
 
-					<div className="mt-6 flex flex-col gap-2 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
-						<p className="font-black text-slate-900" aria-live="polite">
+					<div className="mt-3 border-t border-slate-100 pt-3">
+						<p className="text-sm font-black text-slate-900" aria-live="polite">
 							{filteredPrograms.length} {filteredPrograms.length === 1 ? "program" : "programs"} found
 						</p>
-						<p className="text-sm font-semibold text-slate-500">Filters are saved in the page URL for easy sharing.</p>
 					</div>
 				</div>
 
@@ -118,11 +162,11 @@ const ProgramExplorer = ({
 						<div>
 							<p className="text-sm font-black uppercase tracking-[0.2em] text-[#c95f22]">Northern&rsquo;s 2025–2026 catalog</p>
 							<h2 id="program-results-heading" className="mt-2 text-4xl font-semibold tracking-tight text-[#073b5c] sm:text-5xl">
-								Northern programs
+								Northern Programs
 							</h2>
 						</div>
 						<p className="max-w-md text-sm leading-6 text-slate-500">
-							Program names, credential types, credits, and catalog links come from Northern New Mexico College&rsquo;s official catalog data.
+							Program names, degree, credits, and catalog links data come from Northern New Mexico College&rsquo;s official catalog.
 						</p>
 					</div>
 
@@ -146,7 +190,7 @@ const ProgramExplorer = ({
 							</p>
 							<button
 								type="button"
-								onClick={onClearFilters}
+								onClick={handleClearFilters}
 								className="mt-6 min-h-11 bg-[#c95f22] px-5 py-2.5 font-black text-white hover:bg-[#a94716] focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
 							>
 								Clear Filters
@@ -155,7 +199,8 @@ const ProgramExplorer = ({
 					)}
 				</section>
 			</div>
-		</section>
+			</section>
+		</div>
 	);
 };
 

@@ -7,6 +7,7 @@ import FindUniversityPage from "./pages/FindUniversityPage.jsx";
 import CollegeDetailPage from "./pages/CollegeDetailPage.jsx";
 import CareerProgramPage from "./pages/CareerProgramPage.jsx";
 import AcademicsPage from "./pages/AcademicsPage.jsx";
+import ProgramExplorer from "./components/academics/ProgramExplorer.jsx";
 import ScheduleGenerator from "./pages/ScheduleGenerator.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import SignupPage from "./pages/SignupPage.jsx";
@@ -21,6 +22,7 @@ const App = () => (
 			<Route path="/educationplan" element={<EducationPlanEditPage />} />
 			<Route path="/career" element={<CareerProgramPage />} />
 			<Route path="/academics" element={<AcademicsPage />} />
+			<Route path="/programs" element={<ProgramExplorer />} />
 			<Route path="/schedule-generator" element={<ScheduleGenerator />} />
 			<Route path="/view" element={<ViewEducationPlanPage />} />
 			<Route path="/uni" element={<FindUniversityPage />} />
