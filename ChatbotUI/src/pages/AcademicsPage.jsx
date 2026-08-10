@@ -1,31 +1,25 @@
 import { useEffect } from "react";
-import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import {
 	FaArrowRight,
 	FaBookOpen,
 	FaBriefcase,
 	FaBuildingColumns,
 	FaCode,
-	FaComments,
 	FaCompass,
 	FaFlask,
 	FaGraduationCap,
 	FaHeartPulse,
 	FaPalette,
 	FaScrewdriverWrench,
-	FaUserGroup,
-	FaWallet,
 } from "react-icons/fa6";
 import {
 	ACADEMIC_PROGRAMS,
-	ACADEMIC_RESOURCES,
 	ACADEMIC_STATS,
 	AREAS_OF_INTEREST,
-	EDPLAN_STEPS,
 } from "../data/academicPrograms.js";
 
 const iconByName = {
-	advisor: FaUserGroup,
 	briefcase: FaBriefcase,
 	building: FaBuildingColumns,
 	code: FaCode,
@@ -33,10 +27,8 @@ const iconByName = {
 	flask: FaFlask,
 	graduation: FaGraduationCap,
 	heart: FaHeartPulse,
-	messages: FaComments,
 	palette: FaPalette,
 	tools: FaScrewdriverWrench,
-	wallet: FaWallet,
 };
 
 const sectionLabelClass =
@@ -130,67 +122,6 @@ const AreaOfInterestGrid = ({ areas, programCounts, activeArea, onSelectArea }) 
 	</section>
 );
 
-const EdPlanSteps = ({ steps }) => (
-	<section id="planning-process" aria-labelledby="edplan-heading" className="scroll-mt-20 bg-[#073b5c] px-5 py-16 text-white sm:px-8 sm:py-20 xl:px-12">
-		<div className="mx-auto max-w-6xl">
-			<div className="max-w-2xl">
-				<p className="text-sm font-black uppercase tracking-[0.2em] text-orange-200">A clearer way forward</p>
-				<h2 id="edplan-heading" className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">
-					How EdPlan AI helps
-				</h2>
-				<p className="mt-4 text-lg leading-8 text-slate-300">
-					Move from early exploration to an advisor-ready academic plan in four connected steps.
-				</p>
-			</div>
-			<ol className="mt-10 grid border border-white/15 md:grid-cols-2 xl:grid-cols-4">
-				{steps.map((step, index) => (
-					<li key={step.id} className="relative border-b border-r border-white/15 bg-white/5 p-7 last:border-r-0 md:[&:nth-child(even)]:border-r-0 xl:border-b-0 xl:[&:nth-child(even)]:border-r xl:last:border-r-0">
-						<div className="grid h-11 w-11 place-items-center bg-[#c95f22] text-lg font-black">
-							{index + 1}
-						</div>
-						<h3 className="mt-5 text-xl font-semibold">{step.title}</h3>
-						<p className="mt-3 leading-7 text-slate-300">{step.description}</p>
-					</li>
-				))}
-			</ol>
-		</div>
-	</section>
-);
-
-const AcademicResources = ({ resources }) => (
-	<section id="student-resources" aria-labelledby="resources-heading" className="scroll-mt-20 px-5 py-16 sm:px-8 sm:py-20 xl:px-12">
-		<div className="mx-auto max-w-6xl">
-			<div className="max-w-2xl">
-				<p className={sectionLabelClass}>Beyond the classroom</p>
-				<h2 id="resources-heading" className="mt-3 text-4xl font-semibold tracking-tight text-[#073b5c] sm:text-5xl">
-					Support for your whole journey
-				</h2>
-			</div>
-			<div className="mt-10 grid gap-px overflow-hidden border border-slate-200 bg-slate-200 md:grid-cols-2 xl:grid-cols-4">
-				{resources.map((resource) => {
-					const Icon = iconByName[resource.icon] ?? FaBookOpen;
-					return (
-						<article key={resource.id} className="flex flex-col bg-white p-7">
-							<div className="grid h-12 w-12 place-items-center bg-[#e7f0f5] text-xl text-[#073b5c]">
-								<Icon aria-hidden="true" />
-							</div>
-							<h3 className="mt-5 text-xl font-semibold text-[#073b5c]">{resource.title}</h3>
-							<p className="mt-3 flex-1 leading-7 text-slate-600">{resource.description}</p>
-							<Link
-								to={resource.to}
-								className="mt-5 inline-flex min-h-11 items-center gap-2 self-start py-2 text-sm font-black uppercase tracking-[0.08em] text-[#c95f22] underline-offset-4 hover:underline focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
-							>
-								{resource.cta}
-								<FaArrowRight aria-hidden="true" />
-							</Link>
-						</article>
-					);
-				})}
-			</div>
-		</div>
-	</section>
-);
-
 const META_DESCRIPTION =
 	"Discover Northern New Mexico College academic programs and build a personalized semester-by-semester education plan with EdPlan AI.";
 
@@ -260,8 +191,6 @@ const AcademicsPage = () => {
 					/>
 				</div>
 			</div>
-			<EdPlanSteps steps={EDPLAN_STEPS} />
-			<AcademicResources resources={ACADEMIC_RESOURCES} />
 		</div>
 	);
 };
