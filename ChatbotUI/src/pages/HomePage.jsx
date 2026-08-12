@@ -84,35 +84,6 @@ const EdPlanSteps = ({ steps }) => (
 
 const AcademicResources = ({ resources }) => (
 	<section id="student-resources" aria-labelledby="resources-heading" className="scroll-mt-20 px-5 py-16 sm:px-8 sm:py-20 xl:px-12">
-		<div className="mx-auto max-w-6xl">
-			<div className="max-w-2xl">
-				<p className={sectionLabelClass}>Beyond the classroom</p>
-				<h2 id="resources-heading" className="mt-3 text-4xl font-semibold tracking-tight text-[#073b5c] sm:text-5xl">
-					Support for your whole journey
-				</h2>
-			</div>
-			<div className="mt-10 grid gap-px overflow-hidden border border-slate-200 bg-slate-200 md:grid-cols-2 xl:grid-cols-4">
-				{resources.map((resource) => {
-					const Icon = resourceIconByName[resource.icon] ?? FaBookOpen;
-					return (
-						<article key={resource.id} className="flex flex-col bg-white p-7">
-							<div className="grid h-12 w-12 place-items-center bg-[#e7f0f5] text-xl text-[#073b5c]">
-								<Icon aria-hidden="true" />
-							</div>
-							<h3 className="mt-5 text-xl font-semibold text-[#073b5c]">{resource.title}</h3>
-							<p className="mt-3 flex-1 leading-7 text-slate-600">{resource.description}</p>
-							<Link
-								to={resource.to}
-								className="mt-5 inline-flex min-h-11 items-center gap-2 self-start py-2 text-sm font-black uppercase tracking-[0.08em] text-[#c95f22] underline-offset-4 hover:underline focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
-							>
-								{resource.cta}
-								<FaArrowRight aria-hidden="true" />
-							</Link>
-						</article>
-					);
-				})}
-			</div>
-		</div>
 	</section>
 );
 
@@ -142,16 +113,15 @@ const HomePage = () => {
 						{firstName ? `Welcome back, ${firstName}` : "For Students in New Mexico"}
 					</div>
 
-					<h1 className="mt-8 max-w-4xl text-5xl font-black leading-[0.98] tracking-[-0.045em] text-[#071a38] sm:text-6xl lg:text-[5.25rem]">
-						<span className="block">Your Education.</span>
-						<span className="mt-2 block">Your Future.</span>
-						<span className="mt-2 block bg-gradient-to-r from-[#1857d9] to-[#3278ee] bg-clip-text text-transparent">Your Plan.</span>
+					<h1 className="mt-8 max-w-4xl text-5xl font-black leading-[0.98] tracking-[-0.045em] text-[#071a38] sm:text-6xl lg:text-[4em]">
+						<span className="block">Your Education Pathway</span>
+						<span className="mt-2 block bg-gradient-to-r from-[#1857d9] to-[#3278ee] bg-clip-text text-transparent">Planner.</span>
 					</h1>
 
 					<p className="mt-7 max-w-2xl text-lg font-medium leading-8 text-slate-600 sm:text-xl">
-						Explore Northern programs, discover the right path, and create your personalized education plan
-						<span className="font-bold text-[#1857d9]"> before </span>
-						you meet with your advisor.
+						Don't just choose what you want to study
+						<span className="font-bold text-[#1857d9]"> know </span>
+						exactly how to get there.
 					</p>
 
 					<div className="mt-8 flex w-full flex-col items-stretch justify-center gap-4 sm:w-auto sm:flex-row sm:items-center">

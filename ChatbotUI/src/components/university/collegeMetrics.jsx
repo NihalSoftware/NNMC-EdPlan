@@ -134,7 +134,7 @@ export const enrollmentMetrics = [
 export const costMetrics = [
   {
     key: "average_annual_cost",
-    label: "Average Annual Net Fee",
+    label: "Average Annual Fee",
     format: formatCurrency,
   },
   { key: "in_state_tuition", label: "In-State Tuition", format: formatCurrency },

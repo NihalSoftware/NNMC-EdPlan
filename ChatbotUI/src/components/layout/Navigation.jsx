@@ -102,10 +102,10 @@ const Navigation = ({ open, setOpen }) => {
 
 			<nav className="flex flex-col gap-2 px-5 py-7">
 				<NavItem to="/NNMC" label="Home" icon={FaHouse} onClick={closeMenu} />
-				<NavItem to="/uni" label="Why Northern" icon={FaBuildingColumns} onClick={closeMenu} />
-				<NavItem to="/career" label="Career and Academics" icon={FaRegCompass} onClick={closeMenu} />
-				<NavItem to="/programs" label="Explore Programs" icon={FaGraduationCap} onClick={closeMenu} />
-				<NavItem to="/intake" label="Onboarding Form" icon={FaClipboardList} onClick={closeMenu} />
+				<NavItem to="/uni" label="Why Northern?" icon={FaBuildingColumns} onClick={closeMenu} />
+				<NavItem to="/intake" label="Your Academic History" icon={FaClipboardList} onClick={closeMenu} />
+				<NavItem to="/career" label="Explore Career Paths" icon={FaRegCompass} onClick={closeMenu} />
+				<NavItem to="/programs" label="Find Your Program" icon={FaGraduationCap} onClick={closeMenu} />
 				<NavItem to="/educationplan" label="Create Education Plan" icon={FaBookOpen} onClick={closeMenu} />
 				{/*<NavItem to="/schedule-generator" label="Schedule Generator" icon={FaCalendarAlt} onClick={closeMenu} />*/}
 				<NavItem to="/view" label="Saved Plans" icon={FaRegBookmark} onClick={closeMenu} />

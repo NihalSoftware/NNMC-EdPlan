@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { jsPDF } from "jspdf";
 import {
@@ -62,7 +62,6 @@ const CourseMeta = ({ course }) => {
 const ViewEducationPlan = () => {
 	const [savedPlans, setSavedPlans] = useState([]);
 	const [programCatalogue, setProgramCatalogue] = useState([]);
-	const [filter, setFilter] = useState("");
 	const [error, setError] = useState("");
 	const [expandedPlanId, setExpandedPlanId] = useState(null);
 	const [deletingPlanId, setDeletingPlanId] = useState(null);
@@ -106,16 +105,6 @@ const ViewEducationPlan = () => {
 		saveStorage("EditingPlanActive", true);
 		navigate("/educationplan");
 	};
-
-	const filteredPlans = useMemo(() => {
-		if (!filter.trim()) return savedPlans;
-		const term = filter.toLowerCase();
-		return savedPlans.filter(
-			(plan) =>
-				plan.program?.toLowerCase().includes(term) ||
-				plan.university?.toLowerCase().includes(term)
-		);
-	}, [savedPlans, filter]);
 
 	const loadLocalPlans = () => {
 		const stored = loadStorage("LocalSavedPlans", []);
@@ -444,19 +433,6 @@ const ViewEducationPlan = () => {
 				</header>
 
 				<div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5 space-y-4">
-					<div className="flex items-center gap-4 flex-wrap">
-						<label className="text-sm font-medium text-slate-700">
-							Filter:
-						</label>
-						<input
-							value={filter}
-							onChange={(event) => setFilter(event.target.value)}
-							className="flex-1 min-w-[200px] px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-							placeholder="Find a saved NNMC plan by program
-"
-						/>
-					</div>
-
 					{error && (
 						<div className="bg-rose-50 text-rose-700 border border-rose-100 rounded-lg px-4 py-3">
 							{error}
@@ -469,7 +445,6 @@ const ViewEducationPlan = () => {
 							<thead>
 								<tr className="text-left text-xs uppercase tracking-wide text-slate-500 border-b border-slate-200 bg-slate-50">
 									<th className="px-2 py-3 font-semibold text-center">No.</th>
-									<th className="px-2 py-3 font-semibold">Institution</th>
 									<th className="px-2 py-3 font-semibold">Program (Degree)</th>
 									<th className="px-2 py-3 font-semibold">Courses</th>
 									<th className="px-2 py-3 font-semibold">Total Credits</th>
@@ -479,14 +454,11 @@ const ViewEducationPlan = () => {
 								</tr>
 							</thead>
 							<tbody>
-								{filteredPlans.map((plan, index) => (
+								{savedPlans.map((plan, index) => (
 									<Fragment key={plan.id}>
 										<tr className="border-b border-slate-100 hover:bg-slate-50 transition">
 											<td className="px-1 py-3 text-center text-slate-700 font-semibold w">
 												{index + 1}
-											</td>
-											<td className="px-2 py-3 md:w-[20%] text-slate-800 font-medium">
-												{plan.university}
 											</td>
 											<td className="px-2 py-3 text-slate-700">
 												{plan.program}
@@ -560,7 +532,7 @@ const ViewEducationPlan = () => {
 										{/* Expanded Plan Details */}
 										{expandedPlanId === plan.id && (
 											<tr key={`${plan.id}-details`}>
-												<td colSpan={7} className="p-0">
+												<td colSpan={5} className="p-0">
 													<div className="bg-slate-50 border-t border-slate-200 p-6">
 														<div className="mb-4 flex items-center justify-between">
 															<h3 className="text-lg font-semibold text-slate-800">
@@ -571,12 +543,6 @@ const ViewEducationPlan = () => {
 																	Avg. annual cost:{" "}
 																	<span className="font-bold text-emerald-700">
 																							{findAverageAnnualCost(plan) || "Not reported by College Scorecard"}
-																	</span>
-																</span>
-																<span className="text-slate-600">
-																	Total Credits:{" "}
-																	<span className="font-bold text-indigo-600">
-																		{getTotalCredits(plan.courses)}
 																	</span>
 																</span>
 																<span className="text-slate-600">
@@ -633,10 +599,10 @@ const ViewEducationPlan = () => {
 										)}
 									</Fragment>
 								))}
-								{filteredPlans.length === 0 && (
+								{savedPlans.length === 0 && (
 									<tr>
 										<td
-											colSpan={7}
+											colSpan={5}
 											className="px-4 py-8 text-center text-slate-500"
 										>
 											<div className="flex flex-col items-center gap-2">

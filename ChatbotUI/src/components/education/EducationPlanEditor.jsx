@@ -1559,22 +1559,6 @@ const EducationPlanEditor = () => {
 						</h2>
 						<div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
 							<div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-4">
-								<div className="space-y-3">
-									<label className="block text-xs font-extrabold uppercase tracking-wide text-slate-400">
-									Institution
-										{selectedUniversity ? (
-											<span className="mt-2 block rounded-md border border-blue-100 bg-blue-50 px-3 py-2 text-sm font-bold normal-case tracking-normal text-blue-800">
-												{selectedUniversity}
-												{selectedDegree && <span className="ml-2 text-blue-600">({selectedDegree})</span>}
-											</span>
-										) : (
-											<span className="mt-2 block rounded-md border border-rose-100 bg-rose-50 px-3 py-2 text-sm font-bold normal-case tracking-normal text-rose-700">
-											Return to the NNMC Overview to select a Northern program.
-											</span>
-										)}
-									</label>
-								</div>
-
 								<label className="block text-xs font-extrabold uppercase tracking-wide text-slate-400">
 									Program
 									<select

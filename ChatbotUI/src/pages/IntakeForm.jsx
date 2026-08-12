@@ -108,7 +108,7 @@ const IntakeForm = () => {
 					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 						<div className="flex flex-col">
 							<h1 className="text-xl sm:text-2xl font-semibold">
-								Plan your path at Northern
+								For better planning tell us about your academic history
 							</h1>
 							<p className="text-xs sm:text-sm text-slate-200 mt-1">
 								Tell us about your goals so we can tailor your NNMC education plan.

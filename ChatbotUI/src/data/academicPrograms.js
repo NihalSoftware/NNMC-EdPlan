@@ -354,22 +354,22 @@ export const EDPLAN_STEPS = [
 	{
 		id: "profile",
 		title: "Create Your Profile",
-		description: "Enter your academic background, home state, interests, goals, and preferences.",
+		description: "Explore areas of your interest.",
 	},
 	{
 		id: "discover",
 		title: "Discover Programs",
-		description: "Find programs that match your strengths, location, interests, and career goals.",
+		description: "Discover careers within that area.",
 	},
 	{
 		id: "compare",
 		title: "Review Your Options",
-		description: "Review requirements, duration, delivery format, and possible career outcomes.",
+		description: "Discover programs within that area.",
 	},
 	{
 		id: "plan",
 		title: "Build Your Education Plan",
-		description: "Create a semester-by-semester path and share it with an academic advisor.",
+		description: "Build your education plan.",
 	},
 ];
 

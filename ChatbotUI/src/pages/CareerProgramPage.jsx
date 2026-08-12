@@ -40,7 +40,7 @@ const sectionLabelClass =
 	"text-sm font-black uppercase tracking-[0.2em] text-[#c95f22]";
 
 const AcademicsHero = () => (
-	<section className="relative isolate flex min-h-[28rem] items-end overflow-hidden bg-[#082a40] text-white sm:min-h-[34rem]">
+	<section className="relative isolate flex min-h-[28rem] items-end overflow-hidden bg-[#082a40] text-white sm:min-h-[20rem]">
 		<img
 			src="/assets/academics-hero.png"
 			alt="Graduates celebrating on a Southwestern college campus"
@@ -49,10 +49,10 @@ const AcademicsHero = () => (
 		<div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-r from-[#041b2b]/95 via-[#041b2b]/55 to-transparent" />
 		<div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
 		<div className="mx-auto w-full max-w-[90rem] px-5 pb-12 pt-28 sm:px-8 sm:pb-16 xl:px-12">
-			<h1 className="max-w-4xl text-5xl font-semibold leading-none tracking-tight sm:text-6xl lg:text-7xl">
+			<h1 className="max-w-4xl text-5xl font-semibold leading-none tracking-tight sm:text-6xl lg:text-6xl">
 				Explore academics and careers
 			</h1>
-			<p className="mt-5 max-w-xl text-lg font-medium leading-8 text-white/85 sm:text-xl">
+			<p className="mt-5 max-w-4xl text-lg font-medium leading-8 text-white/85 sm:text-xl">
 				Find an academic area that matches your goals, then explore the careers connected to it.
 			</p>
 		</div>
@@ -314,7 +314,7 @@ const CareerProgramPage = () => {
 												<p className="mt-1 font-black text-emerald-700">{career.salary}</p>
 											</div>
 											<div>
-												<p className="text-sm font-black uppercase tracking-wide text-slate-500">Academic pathways</p>
+												<p className="text-sm font-black uppercase tracking-wide text-slate-500">Required Program</p>
 												<div className="mt-2 flex flex-wrap gap-2">
 													{pathwayNames.map((pathway) => <span key={pathway} className="bg-[#e7f0f5] px-3 py-1.5 text-sm font-bold text-[#073b5c]">{pathway}</span>)}
 												</div>
