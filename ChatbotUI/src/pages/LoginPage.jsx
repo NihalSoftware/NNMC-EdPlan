@@ -50,7 +50,7 @@ const LoginPage = ({ initialMode = "login" }) => {
 						saveStorage("UserProfile", data);
 					}
 					saveStorage("UserEmail", form.email);
-					navigate("/home");
+					navigate("/NNMC");
 				} else {
 					setError(message || "Login failed. Please check your credentials.");
 				}

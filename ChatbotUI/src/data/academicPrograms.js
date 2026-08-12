@@ -403,7 +403,7 @@ export const ACADEMIC_RESOURCES = [
 		title: "Student Support through CampusBot",
 		description: "See how always-available guidance can help students find the next right resource.",
 		cta: "Ask CampusBot",
-		to: "/home",
+		to: "/NNMC",
 		icon: "messages",
 	},
 ];

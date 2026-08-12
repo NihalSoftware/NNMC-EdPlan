@@ -2,13 +2,17 @@ import { Link } from "react-router-dom";
 import {
 	FaArrowRight,
 	FaBookOpen,
+	FaChartLine,
 	FaComments,
 	FaCompass,
+	FaGraduationCap,
+	FaMagnifyingGlass,
+	FaRocket,
+	FaRoute,
 	FaUserGroup,
 	FaWallet,
 } from "react-icons/fa6";
 import { load } from "../utils/storage.js";
-import { INSTITUTION } from "../config/institution.js";
 import {
 	ACADEMIC_RESOURCES,
 	EDPLAN_STEPS,
@@ -23,6 +27,33 @@ const resourceIconByName = {
 
 const sectionLabelClass =
 	"text-sm font-black uppercase tracking-[0.2em] text-[#c95f22]";
+
+const homepageFeatures = [
+	{
+		id: "explore",
+		title: "Explore Options",
+		description: "Discover Northern programs built around your goals.",
+		icon: FaCompass,
+	},
+	{
+		id: "plan",
+		title: "Plan Your Path",
+		description: "Build a semester-by-semester plan that works for you.",
+		icon: FaRoute,
+	},
+	{
+		id: "progress",
+		title: "Track Progress",
+		description: "Stay on track and adjust your plan as you grow.",
+		icon: FaChartLine,
+	},
+	{
+		id: "prepare",
+		title: "Meet Prepared",
+		description: "Walk into advising with a clear path and confidence.",
+		icon: FaComments,
+	},
+];
 
 const EdPlanSteps = ({ steps }) => (
 	<section id="planning-process" aria-labelledby="edplan-heading" className="scroll-mt-20 bg-[#073b5c] px-5 py-16 text-white sm:px-8 sm:py-20 xl:px-12">
@@ -96,66 +127,78 @@ const HomePage = () => {
 
 	return (
 		<div className="min-h-screen overflow-x-clip bg-white">
-		<section className="w-full min-h-screen flex flex-col items-center justify-center py-12 px-6 bg-gradient-to-br from-sky-50 via-white to-amber-50">
-			<div className="container mx-auto px-4 sm:px-6 lg:px-8">
-				<div className="max-w-4xl mx-auto text-center space-y-8">
-					<img
-						src={INSTITUTION.logoUrl}
-						alt="Northern New Mexico College"
-						className="h-24 w-auto object-contain mx-auto"
-					/>
-					<h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground">
-						Find Your Future <span className="text-[#0069e0]">@Northern</span>
+			<section className="relative isolate overflow-hidden bg-[#f8fbff] px-5 pb-12 pt-14 sm:px-8 sm:pb-16 sm:pt-16 xl:px-12 xl:pt-12">
+				<img
+					src="/assets/home-hero-landscape.svg"
+					alt=""
+					aria-hidden="true"
+					className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[68%] w-full object-cover object-bottom"
+				/>
+				<div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-20 bg-[radial-gradient(circle_at_50%_12%,rgba(219,234,254,0.6),transparent_36%)]" />
+
+				<div className="mx-auto flex min-h-[46rem] max-w-6xl flex-col items-center text-center">
+					<div className="inline-flex min-h-11 items-center gap-2 rounded-full bg-blue-100/80 px-5 py-2 text-sm font-bold text-blue-700 ring-1 ring-inset ring-blue-200/60 backdrop-blur-sm">
+						<FaGraduationCap aria-hidden="true" className="text-base" />
+						{firstName ? `Welcome back, ${firstName}` : "For Students in New Mexico"}
+					</div>
+
+					<h1 className="mt-8 max-w-4xl text-5xl font-black leading-[0.98] tracking-[-0.045em] text-[#071a38] sm:text-6xl lg:text-[5.25rem]">
+						<span className="block">Your Education.</span>
+						<span className="mt-2 block">Your Future.</span>
+						<span className="mt-2 block bg-gradient-to-r from-[#1857d9] to-[#3278ee] bg-clip-text text-transparent">Your Plan.</span>
 					</h1>
 
-					<h2 className="text-4xl font-bold text-slate-900">
-						Small community. Great opportunity.
-					</h2>
-
-					<p className="text-lg text-slate-600">
-						Explore Northern New Mexico College programs, connect them to career
-						goals, and build a personalized path toward graduation.
+					<p className="mt-7 max-w-2xl text-lg font-medium leading-8 text-slate-600 sm:text-xl">
+						Explore Northern programs, discover the right path, and create your personalized education plan
+						<span className="font-bold text-[#1857d9]"> before </span>
+						you meet with your advisor.
 					</p>
-				</div>
-			</div>
 
-			<div className="max-w-3xl text-center space-y-6">
-				<div className="flex flex-wrap items-center justify-center gap-4 mt-5">
-					{firstName ? (
-						<div className="px-6 py-3 rounded-lg border border-slate-300 text-slate-700 font-semibold">
-							Hi {firstName}
-						</div>
-					) : (
+					<div className="mt-8 flex w-full flex-col items-stretch justify-center gap-4 sm:w-auto sm:flex-row sm:items-center">
 						<Link
-							to="/login"
-							className="px-6 py-3 rounded-lg border border-slate-300 text-slate-700 font-semibold hover:border-slate-500"
+							to="/educationplan"
+							className="inline-flex min-h-14 items-center justify-center gap-3 rounded-xl bg-[#1759df] px-7 py-3 text-base font-extrabold text-white shadow-[0_14px_30px_-12px_rgba(23,89,223,0.8)] transition hover:-translate-y-0.5 hover:bg-[#0e47c4] focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"
 						>
-							Login
+							<FaRocket aria-hidden="true" />
+							Start My Education Plan
 						</Link>
-					)}
-					<Link
-						to="/career"
-						className="px-6 py-3 rounded-lg bg-[#0069e0] hover:bg-[#1977e3] text-white font-semibold shadow"
-					>
-						Explore NNMC Programs
-					</Link>
-				</div>
+						<Link
+							to="/programs"
+							className="inline-flex min-h-14 items-center justify-center gap-3 rounded-xl border-2 border-[#2d69df] bg-white/80 px-7 py-3 text-base font-extrabold text-[#0b2143] backdrop-blur-sm transition hover:-translate-y-0.5 hover:bg-white focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"
+						>
+							<FaMagnifyingGlass aria-hidden="true" className="text-[#1759df]" />
+							Explore My Options
+						</Link>
+					</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-600">
-					<div className="bg-white rounded-lg shadow p-4">
-						Build an NNMC degree plan tailored to your goals.
-					</div>
-					<div className="bg-white rounded-lg shadow p-4">
-						Review official NNMC cost and financial-aid information.
-					</div>
-					<div className="bg-white rounded-lg shadow p-4">
-						Connect programs with career paths and practical next steps.
+					<div className="mt-auto w-full rounded-2xl border border-white/80 bg-white/90 p-3 text-left shadow-[0_22px_70px_-28px_rgba(38,84,130,0.35)] backdrop-blur-md sm:p-5">
+						<ul className="grid sm:grid-cols-2 xl:grid-cols-4">
+							{homepageFeatures.map((feature, index) => {
+								const Icon = feature.icon;
+								const borderClass = [
+									"",
+									"border-t border-slate-200 sm:border-l sm:border-t-0",
+									"border-t border-slate-200 xl:border-l xl:border-t-0",
+									"border-t border-slate-200 sm:border-l xl:border-t-0",
+								][index];
+								return (
+									<li key={feature.id} className={`flex gap-3 px-3 py-4 ${borderClass}`}>
+										<div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-blue-50 text-lg text-[#1759df] ring-1 ring-inset ring-blue-100">
+											<Icon aria-hidden="true" />
+										</div>
+										<div className="min-w-0">
+											<h2 className="text-sm font-extrabold text-[#0b1f3a]">{feature.title}</h2>
+											<p className="mt-1 text-xs leading-5 text-slate-600">{feature.description}</p>
+										</div>
+									</li>
+								);
+							})}
+						</ul>
 					</div>
 				</div>
-			</div>
-		</section>
-		<EdPlanSteps steps={EDPLAN_STEPS} />
-		<AcademicResources resources={ACADEMIC_RESOURCES} />
+			</section>
+			<EdPlanSteps steps={EDPLAN_STEPS} />
+			<AcademicResources resources={ACADEMIC_RESOURCES} />
 		</div>
 	);
 };
