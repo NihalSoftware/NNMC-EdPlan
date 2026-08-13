@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
 	FaArrowRight,
 	FaBookOpen,
@@ -17,7 +17,7 @@ import {
 	FaScrewdriverWrench,
 	FaXmark,
 } from "react-icons/fa6";
-import { ACADEMIC_STATS, AREAS_OF_INTEREST } from "../data/academicPrograms.js";
+import { ACADEMIC_PROGRAMS, ACADEMIC_STATS, AREAS_OF_INTEREST } from "../data/academicPrograms.js";
 import {
 	buildCareerRecords,
 	countCareersByArea,
@@ -38,6 +38,48 @@ const iconByName = {
 
 const sectionLabelClass =
 	"text-sm font-black uppercase tracking-[0.2em] text-[#c95f22]";
+
+const degreeTypeByCareerDegree = {
+	Associate: "Associate Degree",
+	Bachelors: "Bachelor's Degree",
+	Certificate: "Certificate",
+};
+
+const programAliases = {
+	"Associate::Nursing": "Associate Degree Nursing, AAS",
+	"Bachelors::Nursing": "RN to BSN",
+};
+
+const normalizeProgramName = (value = "") =>
+	String(value)
+		.toLowerCase()
+		.replace(/\([^)]*\)/g, " ")
+		.replace(/&/g, " and ")
+		.replace(/\b(?:bais|bba|beng|aeng|aas|bsn|aa|as|ba|bs|certificate)\b/g, " ")
+		.replace(/[^a-z0-9]+/g, " ")
+		.trim();
+
+const getProgramExplorerDestination = (pathway) => {
+	const alias = programAliases[`${pathway.degree}::${pathway.program}`];
+	const requestedName = alias || pathway.program;
+	const normalizedRequest = normalizeProgramName(requestedName);
+	const expectedDegreeType = degreeTypeByCareerDegree[pathway.degree];
+	const degreeMatches = expectedDegreeType
+		? ACADEMIC_PROGRAMS.filter((program) => program.degreeType === expectedDegreeType)
+		: ACADEMIC_PROGRAMS;
+	const findMatch = (programs) =>
+		programs.find((program) => normalizeProgramName(program.name) === normalizedRequest) ||
+		programs.find((program) => {
+			const normalizedProgram = normalizeProgramName(program.name);
+			return normalizedProgram.includes(normalizedRequest) || normalizedRequest.includes(normalizedProgram);
+		});
+	const matchedProgram = findMatch(degreeMatches) || findMatch(ACADEMIC_PROGRAMS);
+	const params = new URLSearchParams({ q: matchedProgram?.name || pathway.program });
+	if (matchedProgram) params.set("program", matchedProgram.id);
+	const targetId = matchedProgram ? `program-${matchedProgram.id}` : "program-results-heading";
+
+	return `/programs?${params.toString()}#${targetId}`;
+};
 
 const AcademicsHero = () => (
 	<section className="relative isolate flex min-h-[28rem] items-end overflow-hidden bg-[#082a40] text-white sm:min-h-[20rem]">
@@ -257,6 +299,7 @@ const CareerProgramPage = () => {
 				activeArea={selectedArea}
 				onSelectArea={handleAreaExplore}
 			/>
+			{selectedArea && (
 			<section aria-labelledby="career-results-heading" className="px-5 py-14 sm:px-8 sm:py-16 xl:px-12">
 				<div className="mx-auto max-w-6xl">
 					<div role="group" aria-label="Academic area filter" className="border border-slate-200 bg-white p-4 shadow-sm">
@@ -302,7 +345,10 @@ const CareerProgramPage = () => {
 					{!loading && !error && filteredCareers.length > 0 && (
 						<div className="mt-8 grid gap-6 xl:grid-cols-2">
 							{filteredCareers.map((career) => {
-								const pathwayNames = [...new Set(career.pathways.map((pathway) => pathway.program))];
+								const uniquePathways = career.pathways.filter(
+									(pathway, index, pathways) =>
+										pathways.findIndex((candidate) => candidate.program === pathway.program) === index
+								);
 								return (
 									<article key={career.id} className="flex h-full flex-col border border-slate-200 border-t-4 border-t-[#073b5c] bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-t-[#c95f22] hover:shadow-lg">
 										<h3 className="text-2xl font-semibold leading-tight text-[#073b5c]">{career.title}</h3>
@@ -316,7 +362,17 @@ const CareerProgramPage = () => {
 											<div>
 												<p className="text-sm font-black uppercase tracking-wide text-slate-500">Required Program</p>
 												<div className="mt-2 flex flex-wrap gap-2">
-													{pathwayNames.map((pathway) => <span key={pathway} className="bg-[#e7f0f5] px-3 py-1.5 text-sm font-bold text-[#073b5c]">{pathway}</span>)}
+													{uniquePathways.map((pathway) => (
+														<Link
+															key={pathway.program}
+															to={getProgramExplorerDestination(pathway)}
+															aria-label={`View ${pathway.program} in Find Your Program`}
+															className="inline-flex items-center gap-2 bg-[#e7f0f5] px-3 py-1.5 text-sm font-bold text-[#073b5c] transition hover:bg-[#073b5c] hover:text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+														>
+															{pathway.program}
+															<FaArrowRight aria-hidden="true" className="text-xs" />
+														</Link>
+													))}
 												</div>
 											</div>
 										</div>
@@ -352,6 +408,7 @@ const CareerProgramPage = () => {
 					)}
 				</div>
 			</section>
+			)}
 		</div>
 	);
 };

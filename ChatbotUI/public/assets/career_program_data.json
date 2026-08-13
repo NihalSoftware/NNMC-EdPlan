@@ -726,6 +726,69 @@
               "description": "Supports nursing education programs and practical lab exercises."
             }
           ]
+        },
+        {
+          "name": "Criminal Justice, AA",
+          "description": "Northern New Mexico College associate program connecting criminal justice study with public safety, corrections, and investigation careers.",
+          "careers": [
+            {
+              "title": "Police Officer",
+              "salary": "$48k - $120k",
+              "competencies": [
+                {
+                  "topic": "Public Safety Response",
+                  "description": "Responding to emergency and nonemergency calls while protecting people and property."
+                },
+                {
+                  "topic": "Patrol and Observation",
+                  "description": "Monitoring assigned areas and recognizing activity that may require action."
+                },
+                {
+                  "topic": "Evidence Documentation",
+                  "description": "Collecting evidence and preparing detailed reports for legal proceedings."
+                }
+              ],
+              "description": "Protects lives and property, responds to calls, conducts patrols, and documents incidents for public safety agencies."
+            },
+            {
+              "title": "Correctional Officer",
+              "salary": "$42k - $93k",
+              "competencies": [
+                {
+                  "topic": "Facility Security",
+                  "description": "Following and enforcing procedures that maintain safety in correctional facilities."
+                },
+                {
+                  "topic": "Inmate Supervision",
+                  "description": "Supervising people in custody and responding to safety or discipline concerns."
+                },
+                {
+                  "topic": "Conflict Resolution",
+                  "description": "Using sound judgment and communication to help resolve tense situations."
+                }
+              ],
+              "description": "Maintains safety and order while supervising people in jails, prisons, or during secure transport."
+            },
+            {
+              "title": "Private Investigator",
+              "salary": "$37k - $99k",
+              "competencies": [
+                {
+                  "topic": "Investigative Research",
+                  "description": "Gathering and analyzing information related to legal, financial, or personal matters."
+                },
+                {
+                  "topic": "Interviewing",
+                  "description": "Listening carefully and asking focused questions during an investigation."
+                },
+                {
+                  "topic": "Report Writing",
+                  "description": "Documenting investigative activities, evidence, and conclusions clearly."
+                }
+              ],
+              "description": "Gathers, analyzes, and reports information for clients involved in legal, financial, or personal matters."
+            }
+          ]
         }
       ]
     },
@@ -4590,6 +4653,69 @@
                 }
               ],
               "description": "Works with athletes to enhance performance, mental resilience, and well-being through psychological strategies."
+            }
+          ]
+        },
+        {
+          "name": "Crime and Justice Studies, BAIS",
+          "description": "Northern New Mexico College bachelor's program connecting interdisciplinary justice study with investigation, rehabilitation, and community corrections careers.",
+          "careers": [
+            {
+              "title": "Probation Officer",
+              "salary": "$45k - $106k",
+              "competencies": [
+                {
+                  "topic": "Case Assessment",
+                  "description": "Assessing client needs, risks, and available resources for supervision and support."
+                },
+                {
+                  "topic": "Rehabilitation Planning",
+                  "description": "Developing practical plans that support rehabilitation and compliance."
+                },
+                {
+                  "topic": "Court Communication",
+                  "description": "Preparing reports and communicating case information to courts and treatment providers."
+                }
+              ],
+              "description": "Supervises people on probation or parole and coordinates services that support rehabilitation and community safety."
+            },
+            {
+              "title": "Correctional Treatment Specialist",
+              "salary": "$45k - $106k",
+              "competencies": [
+                {
+                  "topic": "Case Management",
+                  "description": "Managing multiple cases and maintaining accurate client records."
+                },
+                {
+                  "topic": "Reentry Planning",
+                  "description": "Connecting clients with education, employment, counseling, and other reentry resources."
+                },
+                {
+                  "topic": "Needs Assessment",
+                  "description": "Evaluating client needs to recommend appropriate rehabilitation services."
+                }
+              ],
+              "description": "Assesses people in custody and develops rehabilitation and reentry plans with courts, families, and service providers."
+            },
+            {
+              "title": "Detective and Criminal Investigator",
+              "salary": "$48k - $120k",
+              "competencies": [
+                {
+                  "topic": "Criminal Investigation",
+                  "description": "Gathering facts, examining records, and following leads in criminal cases."
+                },
+                {
+                  "topic": "Evidence Collection",
+                  "description": "Collecting and securing evidence for use in legal proceedings."
+                },
+                {
+                  "topic": "Case Reporting",
+                  "description": "Preparing detailed case records and presenting findings clearly."
+                }
+              ],
+              "description": "Investigates suspected crimes by interviewing people, examining records, collecting evidence, and preparing cases."
             }
           ]
         }

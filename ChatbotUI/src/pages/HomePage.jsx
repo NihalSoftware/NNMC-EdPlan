@@ -1,7 +1,5 @@
 import { Link } from "react-router-dom";
 import {
-	FaArrowRight,
-	FaBookOpen,
 	FaChartLine,
 	FaComments,
 	FaCompass,
@@ -9,24 +7,9 @@ import {
 	FaMagnifyingGlass,
 	FaRocket,
 	FaRoute,
-	FaUserGroup,
-	FaWallet,
 } from "react-icons/fa6";
 import { load } from "../utils/storage.js";
-import {
-	ACADEMIC_RESOURCES,
-	EDPLAN_STEPS,
-} from "../data/academicPrograms.js";
-
-const resourceIconByName = {
-	advisor: FaUserGroup,
-	compass: FaCompass,
-	messages: FaComments,
-	wallet: FaWallet,
-};
-
-const sectionLabelClass =
-	"text-sm font-black uppercase tracking-[0.2em] text-[#c95f22]";
+import { EDPLAN_STEPS } from "../data/academicPrograms.js";
 
 const homepageFeatures = [
 	{
@@ -55,6 +38,35 @@ const homepageFeatures = [
 	},
 ];
 
+const HomepageFeatures = ({ features }) => (
+	<section aria-label="Education planning benefits" className="bg-[#f8fbff] px-5 py-12 sm:px-8 sm:py-16 xl:px-12">
+		<div className="mx-auto w-full max-w-6xl rounded-2xl border border-white/80 bg-white/90 p-3 text-left shadow-[0_22px_70px_-28px_rgba(38,84,130,0.35)] backdrop-blur-md sm:p-5">
+			<ul className="grid sm:grid-cols-2 xl:grid-cols-4">
+				{features.map((feature, index) => {
+					const Icon = feature.icon;
+					const borderClass = [
+						"",
+						"border-t border-slate-200 sm:border-l sm:border-t-0",
+						"border-t border-slate-200 xl:border-l xl:border-t-0",
+						"border-t border-slate-200 sm:border-l xl:border-t-0",
+					][index];
+					return (
+						<li key={feature.id} className={`flex gap-3 px-3 py-4 ${borderClass}`}>
+							<div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-blue-50 text-lg text-[#1759df] ring-1 ring-inset ring-blue-100">
+								<Icon aria-hidden="true" />
+							</div>
+							<div className="min-w-0">
+								<h2 className="text-sm font-extrabold text-[#0b1f3a]">{feature.title}</h2>
+								<p className="mt-1 text-xs leading-5 text-slate-600">{feature.description}</p>
+							</div>
+						</li>
+					);
+				})}
+			</ul>
+		</div>
+	</section>
+);
+
 const EdPlanSteps = ({ steps }) => (
 	<section id="planning-process" aria-labelledby="edplan-heading" className="scroll-mt-20 bg-[#073b5c] px-5 py-16 text-white sm:px-8 sm:py-20 xl:px-12">
 		<div className="mx-auto max-w-6xl">
@@ -82,11 +94,6 @@ const EdPlanSteps = ({ steps }) => (
 	</section>
 );
 
-const AcademicResources = ({ resources }) => (
-	<section id="student-resources" aria-labelledby="resources-heading" className="scroll-mt-20 px-5 py-16 sm:px-8 sm:py-20 xl:px-12">
-	</section>
-);
-
 const HomePage = () => {
 	const profile = load("UserProfile");
 	const firstName =
@@ -107,7 +114,7 @@ const HomePage = () => {
 				/>
 				<div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-20 bg-[radial-gradient(circle_at_50%_12%,rgba(219,234,254,0.6),transparent_36%)]" />
 
-				<div className="mx-auto flex min-h-[46rem] max-w-6xl flex-col items-center text-center">
+				<div className="mx-auto flex min-h-[36rem] max-w-6xl flex-col items-center text-center">
 					<div className="inline-flex min-h-11 items-center gap-2 rounded-full bg-blue-100/80 px-5 py-2 text-sm font-bold text-blue-700 ring-1 ring-inset ring-blue-200/60 backdrop-blur-sm">
 						<FaGraduationCap aria-hidden="true" className="text-base" />
 						{firstName ? `Welcome back, ${firstName}` : "For Students in New Mexico"}
@@ -119,7 +126,7 @@ const HomePage = () => {
 					</h1>
 
 					<p className="mt-7 max-w-2xl text-lg font-medium leading-8 text-slate-600 sm:text-xl">
-						Don't just choose what you want to study
+						Don&apos;t just choose what you want to study
 						<span className="font-bold text-[#1857d9]"> know </span>
 						exactly how to get there.
 					</p>
@@ -140,35 +147,10 @@ const HomePage = () => {
 							Explore My Options
 						</Link>
 					</div>
-
-					<div className="mt-auto w-full rounded-2xl border border-white/80 bg-white/90 p-3 text-left shadow-[0_22px_70px_-28px_rgba(38,84,130,0.35)] backdrop-blur-md sm:p-5">
-						<ul className="grid sm:grid-cols-2 xl:grid-cols-4">
-							{homepageFeatures.map((feature, index) => {
-								const Icon = feature.icon;
-								const borderClass = [
-									"",
-									"border-t border-slate-200 sm:border-l sm:border-t-0",
-									"border-t border-slate-200 xl:border-l xl:border-t-0",
-									"border-t border-slate-200 sm:border-l xl:border-t-0",
-								][index];
-								return (
-									<li key={feature.id} className={`flex gap-3 px-3 py-4 ${borderClass}`}>
-										<div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-blue-50 text-lg text-[#1759df] ring-1 ring-inset ring-blue-100">
-											<Icon aria-hidden="true" />
-										</div>
-										<div className="min-w-0">
-											<h2 className="text-sm font-extrabold text-[#0b1f3a]">{feature.title}</h2>
-											<p className="mt-1 text-xs leading-5 text-slate-600">{feature.description}</p>
-										</div>
-									</li>
-								);
-							})}
-						</ul>
-					</div>
 				</div>
 			</section>
 			<EdPlanSteps steps={EDPLAN_STEPS} />
-			<AcademicResources resources={ACADEMIC_RESOURCES} />
+			<HomepageFeatures features={homepageFeatures} />
 		</div>
 	);
 };

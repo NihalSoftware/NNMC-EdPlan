@@ -1281,7 +1281,7 @@ const EducationPlanEditor = () => {
 			<div className="mx-auto max-w-none">
 				<header className="mb-4">
 					<h1 className="text-2xl font-semibold text-slate-950">
-						Customize Your Education <span className="text-blue-600">Plan</span>
+						Build Your Semester-by-Semester <span className="text-blue-600">Plan</span>
 					</h1>
 				</header>
 
@@ -1291,7 +1291,7 @@ const EducationPlanEditor = () => {
 					</div>
 				)}
 
-				<div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_550px]">
+				<div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_500px]">
 					<aside className="space-y-4 xl:order-2">
 						<div className="hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
 							<div className="flex items-center gap-3">
@@ -1554,8 +1554,8 @@ const EducationPlanEditor = () => {
 					</aside>
 
 					<main className="space-y-4 xl:order-1">
-						<h2 className="text-xl font-semibold text-slate-800">
-							My Education Plan
+						<h2 className="text-md font-semibold text-slate-800">
+							A general semester-by-semester plan is suggested to help you get started. Review the recommended courses and customize the plan based on your academic needs, preferences, and goals.
 						</h2>
 						<div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
 							<div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-4">

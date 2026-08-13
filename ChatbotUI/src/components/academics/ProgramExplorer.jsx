@@ -39,6 +39,7 @@ const ProgramExplorer = () => {
 		() => filterPrograms(ACADEMIC_PROGRAMS, filters),
 		[filters]
 	);
+	const targetedProgramId = searchParams.get("program") ?? "";
 	const degreeTypes = useMemo(
 		() => uniqueSortedValues(ACADEMIC_PROGRAMS, "degreeType"),
 		[]
@@ -70,6 +71,18 @@ const ProgramExplorer = () => {
 		};
 	}, []);
 
+	useEffect(() => {
+		if (!targetedProgramId || !filteredPrograms.some((program) => program.id === targetedProgramId)) return;
+
+		const animationFrame = window.requestAnimationFrame(() => {
+			const programCard = document.getElementById(`program-${targetedProgramId}`);
+			programCard?.scrollIntoView({ behavior: "smooth", block: "center" });
+			programCard?.focus({ preventScroll: true });
+		});
+
+		return () => window.cancelAnimationFrame(animationFrame);
+	}, [filteredPrograms, targetedProgramId]);
+
 	const handleFilterChange = useCallback(
 		(key, value) => {
 			const parameterByFilter = {
@@ -79,6 +92,7 @@ const ProgramExplorer = () => {
 			};
 			const parameter = parameterByFilter[key];
 			const next = new URLSearchParams(searchParams);
+			next.delete("program");
 			if (value) next.set(parameter, value);
 			else next.delete(parameter);
 			setSearchParams(next, { replace: true });
@@ -176,6 +190,7 @@ const ProgramExplorer = () => {
 								<ProgramCard
 									key={program.id}
 									program={program}
+									isTargeted={program.id === targetedProgramId}
 								/>
 							))}
 						</div>

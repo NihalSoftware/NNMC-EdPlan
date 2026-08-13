@@ -6,8 +6,15 @@ import {
 } from "react-icons/fa6";
 import { getEducationPlanUrl } from "../../utils/catalogProgramSelection.js";
 
-const ProgramCard = ({ program }) => (
-	<article className="flex h-full flex-col border border-slate-200 border-t-4 border-t-[#073b5c] bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-t-[#c95f22] hover:shadow-lg">
+const ProgramCard = ({ program, isTargeted = false }) => (
+	<article
+		id={`program-${program.id}`}
+		tabIndex={isTargeted ? -1 : undefined}
+		aria-label={`${program.name} program`}
+		className={`scroll-mt-24 flex h-full flex-col border border-slate-200 border-t-4 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-t-[#c95f22] hover:shadow-lg focus:outline-none ${
+			isTargeted ? "border-t-[#c95f22] ring-4 ring-orange-100" : "border-t-[#073b5c]"
+		}`}
+	>
 		<div className="flex flex-wrap items-start gap-3">
 			<span className="bg-slate-100 px-3 py-1 text-xs font-black uppercase tracking-wide text-slate-600">
 				{program.degreeType}
