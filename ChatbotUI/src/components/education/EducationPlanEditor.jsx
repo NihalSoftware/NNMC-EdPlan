@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
 	FaChevronDown,
+	FaChevronLeft,
+	FaChevronRight,
 	FaChevronUp,
 	FaTrash,
 } from "react-icons/fa";
@@ -303,6 +305,7 @@ const EducationPlanEditor = () => {
 	const [yearFilter, setYearFilter] = useState("");
 	const [semesterFilter, setSemesterFilter] = useState("");
 	const [courseListTab, setCourseListTab] = useState("core");
+	const [isCourseListExpanded, setIsCourseListExpanded] = useState(false);
 	const [dependencyIssues, setDependencyIssues] = useState([]);
 	const [creditLimitModal, setCreditLimitModal] = useState(null);
 	const [expandedTerms, setExpandedTerms] = useState(() => ({
@@ -774,10 +777,14 @@ const EducationPlanEditor = () => {
 		() => new Set(courses.map((course) => course.code)),
 		[courses]
 	);
+	const unplannedCourses = useMemo(
+		() => availableCourses.filter((course) => !addedCourseCodes.has(course.code)),
+		[availableCourses, addedCourseCodes]
+	);
 
 	const groupedProgramCourses = useMemo(() => {
 		const groups = new Map();
-		availableCourses.forEach((course) => {
+		unplannedCourses.forEach((course) => {
 			const occurrences = [...(course.requirement_occurrences || [])].sort(
 				(a, b) => (a.sequence || 0) - (b.sequence || 0)
 			);
@@ -813,18 +820,21 @@ const EducationPlanEditor = () => {
 						String(a.code || "").localeCompare(String(b.code || ""))
 				),
 			}));
-	}, [availableCourses]);
+	}, [unplannedCourses]);
 
 	const courseListCounts = useMemo(
 		() =>
-			availableCourses.reduce(
+			unplannedCourses.reduce(
 				(counts, course) => {
 					counts[course.is_elective ? "elective" : "core"] += 1;
 					return counts;
 				},
 				{ core: 0, elective: 0 }
 			),
-		[availableCourses]
+		[unplannedCourses]
+	);
+	const hasCatalogCoursesForSelectedTab = availableCourses.some((course) =>
+		courseListTab === "elective" ? course.is_elective : !course.is_elective
 	);
 
 	const visibleProgramCourseGroups = useMemo(
@@ -1291,8 +1301,18 @@ const EducationPlanEditor = () => {
 					</div>
 				)}
 
-				<div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_500px]">
-					<aside className="space-y-4 xl:order-2">
+				<div
+					className={`grid gap-5 lg:items-start ${
+						isCourseListExpanded
+							? "lg:grid-cols-[minmax(0,1fr)_400px]"
+							: "lg:grid-cols-[minmax(0,1fr)_56px]"
+					}`}
+				>
+					<aside
+						className={`space-y-4 lg:fixed lg:right-8 lg:top-16 lg:z-20 lg:order-2 ${
+							isCourseListExpanded ? "lg:w-[400px]" : "lg:w-14"
+						}`}
+					>
 						<div className="hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
 							<div className="flex items-center gap-3">
 								<div className="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-700 text-sm font-extrabold text-white">
@@ -1342,17 +1362,48 @@ const EducationPlanEditor = () => {
 							</div>
 						</div>
 
-						<div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-							<div className="mb-3 flex items-center justify-between">
-								<h4 className="text-xs font-extrabold uppercase tracking-wide text-slate-500">
+						<div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+							<button
+								type="button"
+								onClick={() => setIsCourseListExpanded((expanded) => !expanded)}
+								aria-expanded={isCourseListExpanded}
+								aria-controls="program-course-list-panel"
+								aria-label={`${isCourseListExpanded ? "Collapse" : "Expand"} Program Course List`}
+								className={`flex w-full items-center justify-between gap-3 text-left transition hover:bg-slate-50 ${
+									isCourseListExpanded
+										? "px-4 py-3"
+										: "px-4 py-3 lg:min-h-56 lg:flex-col lg:justify-start lg:px-2"
+								}`}
+							>
+								<h4
+									className={`text-xs font-extrabold uppercase tracking-wide text-slate-500 ${
+										isCourseListExpanded
+											? ""
+											: "lg:rotate-180 lg:whitespace-nowrap lg:[writing-mode:vertical-rl]"
+									}`}
+								>
 									Program Course list
 								</h4>
-								<div className="flex flex-wrap items-center gap-2">
-									<span className="rounded bg-slate-50 px-2 py-1 text-xs font-extrabold text-slate-500">
-										{availableCourses.length}
-									</span>
+								<div
+									className={`flex flex-wrap items-center gap-2 ${
+										isCourseListExpanded ? "" : "lg:flex-col"
+									}`}
+								>
+                      {isCourseListExpanded ? (
+										<>
+											<FaChevronUp className="h-3 w-3 text-slate-400 lg:hidden" aria-hidden="true" />
+											<FaChevronRight className="hidden h-3 w-3 text-slate-400 lg:block" aria-hidden="true" />
+										</>
+									) : (
+										<>
+											<FaChevronDown className="h-3 w-3 text-slate-400 lg:hidden" aria-hidden="true" />
+											<FaChevronLeft className="hidden h-3 w-3 text-slate-400 lg:block" aria-hidden="true" />
+										</>
+									)}
 								</div>
-							</div>
+							</button>
+							{isCourseListExpanded && (
+								<div id="program-course-list-panel" className="border-t border-slate-100 px-4 pb-4 pt-3">
 							<p className="mb-3 rounded-md bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700">
 								Adding to: {activeTermLabel}
 							</p>
@@ -1372,7 +1423,7 @@ const EducationPlanEditor = () => {
 								</div>
 							)}
 							<div
-								className="mb-3 grid grid-cols-2 overflow-hidden border-b-4 border-blue-700"
+								className="mb-3 grid grid-cols-2 overflow-hidden"
 								role="tablist"
 								aria-label="Program course types"
 							>
@@ -1381,6 +1432,20 @@ const EducationPlanEditor = () => {
 									{ key: "elective", label: "Elective Courses" },
 								].map((tab) => {
 									const isActive = courseListTab === tab.key;
+									const tabColors =
+										tab.key === "core"
+											? {
+												active: "bg-emerald-600 text-white",
+												inactive:
+													"bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
+												count: "bg-emerald-100 text-emerald-700",
+											}
+											: {
+												active: "bg-amber-500 text-white",
+												inactive:
+													"bg-amber-50 text-amber-700 hover:bg-amber-100",
+												count: "bg-amber-100 text-amber-700",
+											};
 									return (
 										<button
 											key={tab.key}
@@ -1388,19 +1453,17 @@ const EducationPlanEditor = () => {
 											role="tab"
 											aria-selected={isActive}
 											onClick={() => setCourseListTab(tab.key)}
-											className={`flex items-center justify-center gap-2 border-x border-t px-3 py-2.5 text-sm font-extrabold transition ${
-												isActive
-													? "border-blue-700 bg-blue-700 text-white"
-													: "border-slate-200 bg-slate-50 text-slate-700 hover:bg-blue-50 hover:text-blue-800"
-											}`}
+										className={`flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-extrabold transition ${
+											isActive ? tabColors.active : tabColors.inactive
+										}`}
 										>
 											{tab.label}
 											<span
-												className={`rounded-full px-2 py-0.5 text-[10px] ${
-													isActive
-														? "bg-white/20 text-white"
-														: "bg-slate-200 text-slate-600"
-												}`}
+											className={`rounded-full px-2 py-0.5 text-[10px] ${
+												isActive
+													? "bg-white/20 text-white"
+													: tabColors.count
+											}`}
 											>
 												{courseListCounts[tab.key]}
 											</span>
@@ -1408,7 +1471,7 @@ const EducationPlanEditor = () => {
 									);
 								})}
 							</div>
-							<div className="max-h-[calc(100vh-320px)] space-y-3 overflow-y-auto pr-1">
+							<div className="max-h-[calc(100vh-320px)] space-y-3 overflow-y-auto pr-1 lg:max-h-[calc(100vh-350px)]">
 								{isProgramLoading && (
 									<p
 										role="status"
@@ -1441,9 +1504,19 @@ const EducationPlanEditor = () => {
 								{!isProgramLoading &&
 									!programLoadError &&
 									availableCourses.length > 0 &&
+									unplannedCourses.length === 0 && (
+										<p className="rounded-lg border border-dashed border-emerald-200 bg-emerald-50 p-4 text-center text-sm font-semibold text-emerald-700">
+											All program courses are already in the education plan.
+										</p>
+									)}
+								{!isProgramLoading &&
+									!programLoadError &&
+									unplannedCourses.length > 0 &&
 									courseListCounts[courseListTab] === 0 && (
 										<p className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-center text-sm font-semibold text-slate-500">
-											No {courseListTab} courses are listed for this program.
+											{hasCatalogCoursesForSelectedTab
+												? `All ${courseListTab} courses are already in the education plan.`
+												: `No ${courseListTab} courses are listed for this program.`}
 										</p>
 									)}
 								{visibleProgramCourseGroups.map((group) => (
@@ -1467,40 +1540,36 @@ const EducationPlanEditor = () => {
 												return (
 													<div
 														key={course.id || course.code}
-														className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition hover:border-blue-200 hover:shadow-md"
+														className="flex min-h-[7.25rem] flex-col rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition hover:border-blue-200 hover:shadow-md"
 													>
-														<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-															<div className="min-w-0 flex-1">
+														<div className="min-w-0">
 																{course.catalog_url ? (
 																	<a
 																		href={course.catalog_url}
 																		target="_blank"
 																		rel="noreferrer"
-																		className="text-sm font-black text-slate-900 hover:text-blue-700"
+																		title={`${course.code} ${course.name}`}
+																		className="block truncate whitespace-nowrap text-sm font-black text-slate-900 hover:text-blue-700"
 																	>
 																		{course.code} {course.name}
 																	</a>
 																) : (
-																	<p className="text-sm font-black text-slate-900">
+																	<p
+																		title={`${course.code} ${course.name}`}
+																		className="truncate whitespace-nowrap text-sm font-black text-slate-900"
+																	>
 																		{course.code} {course.name}
 																	</p>
 																)}
-																<div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+																<div className="mt-2 flex flex-wrap items-center gap-x-1 gap-y-1 text-xs text-slate-700">
 																	<span className="font-bold text-slate-700">
 																		{course.credits == null
 																			? creditLabel
 																			: `${course.credits} ${Number(course.credits) === 1 ? "Credit" : "Credits"}`}
 																	</span>
-																	<span
-																		className={`rounded px-2 py-1 text-[10px] font-extrabold text-white ${
-																			course.is_elective ? "bg-amber-500" : "bg-emerald-600"
-																		}`}
-																	>
-																		{course.is_elective ? "Elective" : "Core"}
-																	</span>
-																	{course.credit_contact_text
-																		? ` · ${course.credit_contact_text}`
-																		: ""}
+																	{course.credit_contact_text && (
+																		<span>· {course.credit_contact_text}</span>
+																	)}
 																</div>
 																{hasMeaningfulRequirement(course.prerequisite) && (
 																	<p className="mt-2 text-xs font-semibold text-slate-600">
@@ -1514,7 +1583,8 @@ const EducationPlanEditor = () => {
 																		{course.corequisite}
 																	</p>
 																)}
-															</div>
+														</div>
+														<div className="mt-auto flex justify-end pt-3">
 															<button
 																type="button"
 																onClick={() => addCourse(course)}
@@ -1524,7 +1594,7 @@ const EducationPlanEditor = () => {
 																		? `${course.code} is already in the plan`
 																		: `Add ${course.code} to ${activeTermLabel}`
 																}
-																className={`inline-flex min-h-10 w-full shrink-0 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-extrabold transition sm:w-36 ${
+																className={`inline-flex h-9 w-32 shrink-0 items-center justify-center rounded-md border px-3 text-xs font-extrabold transition ${
 																	isAdded
 																		? "cursor-default border-emerald-200 bg-emerald-50 text-emerald-700"
 																		: "border-blue-700 bg-blue-700 text-white shadow-sm hover:bg-blue-800"
@@ -1533,13 +1603,7 @@ const EducationPlanEditor = () => {
 																{isAdded ? (
 																	<span>Added to Plan</span>
 																) : (
-																	<>
-																		
-																		
-																		
-																		
-																		Add to Semester
-																	</>
+																	<span>Add to Semester</span>
 																)}
 															</button>
 														</div>
@@ -1550,18 +1614,26 @@ const EducationPlanEditor = () => {
 									</section>
 								))}
 							</div>
+								</div>
+							)}
 						</div>
 					</aside>
 
-					<main className="space-y-4 xl:order-1">
+					<main className="min-w-0 space-y-4 lg:order-1">
 						<h2 className="text-md font-semibold text-slate-800">
 							A general semester-by-semester plan is suggested to help you get started. Review the recommended courses and customize the plan based on your academic needs, preferences, and goals.
 						</h2>
 						<div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-							<div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-4">
-								<label className="block text-xs font-extrabold uppercase tracking-wide text-slate-400">
-									Program
+							<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+								<div className="flex min-w-0 flex-1 items-center gap-3">
+									<label
+										htmlFor="education-plan-program"
+										className="shrink-0 text-xs font-extrabold uppercase tracking-wide text-slate-400"
+									>
+										Program
+									</label>
 									<select
+										id="education-plan-program"
 										value={selectedProgramMeta?.program_id || ""}
 										onChange={(event) => {
 											const found = programs.find(
@@ -1580,7 +1652,7 @@ const EducationPlanEditor = () => {
 												saveStorage("ProgramDegree", "");
 											}
 										}}
-										className="mt-2 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-bold normal-case tracking-normal text-slate-700 outline-none focus:border-blue-500"
+										className="min-w-0 flex-1 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-bold normal-case tracking-normal text-slate-700 outline-none focus:border-blue-500"
 									>
 										<option value="">Select Program</option>
 										{uniqueProgramOptions.map((program) => (
@@ -1592,7 +1664,18 @@ const EducationPlanEditor = () => {
 											</option>
 										))}
 									</select>
-								</label>
+								</div>
+								<button
+									type="button"
+									onClick={savePlan}
+									disabled={
+										isProgramLoading ||
+										dependencyIssues.some((issue) => issue.blocking)
+									}
+									className="inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-lg bg-indigo-600 px-4 text-xs font-extrabold text-white shadow-sm hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+								>
+									Save Your Plan
+								</button>
 							</div>
 
 							<div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
@@ -1657,17 +1740,6 @@ const EducationPlanEditor = () => {
 												({planTerms.length}/{MAX_SEMESTERS})
 											</span>
 										</button>
-										<button
-											type="button"
-											onClick={savePlan}
-											disabled={
-												isProgramLoading ||
-												dependencyIssues.some((issue) => issue.blocking)
-											}
-											className="inline-flex h-10 items-center whitespace-nowrap rounded-lg bg-indigo-600 px-4 text-xs font-extrabold text-white shadow-sm hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
-										>
-											Save Your Plan
-										</button>
 									</div>
 								</div>
 							</div>
@@ -1718,7 +1790,11 @@ const EducationPlanEditor = () => {
 							</div>
 						)}
 
-						<div className="space-y-2">
+						<div
+							className={`grid grid-cols-1 items-start gap-3 ${
+								isCourseListExpanded ? "2xl:grid-cols-2" : "lg:grid-cols-2"
+							}`}
+						>
 							{!isProgramLoading &&
 								groupedCourseEntries.map(([groupKey, courseList, termNumber]) => {
 								const [courseYear, courseSemester] = groupKey.split("::");
@@ -1728,12 +1804,6 @@ const EducationPlanEditor = () => {
 									return sum + (Number.isFinite(value) ? value : 0);
 								}, 0);
 								const isExpanded = Boolean(expandedTerms[groupKey]);
-								const status = activeTermKey === groupKey ? "Selected" : "Planned";
-								const statusClass =
-									status === "Selected"
-										? "bg-blue-50 text-blue-700"
-										: "bg-slate-100 text-slate-500";
-
 								return (
 									<div
 										key={groupKey}
@@ -1742,7 +1812,7 @@ const EducationPlanEditor = () => {
 										}`}
 									>
 						<div
-							className={`flex w-full items-center gap-3 px-4 py-4 ${
+							className={`grid w-full grid-cols-[minmax(0,1fr)_auto_auto] items-start gap-2 px-3 py-3 ${
 								activeTermKey === groupKey ? "bg-blue-50/70" : ""
 							}`}
 						>
@@ -1755,15 +1825,8 @@ const EducationPlanEditor = () => {
 									[groupKey]: !prev[groupKey],
 								}));
 							}}
-							className="flex min-w-0 flex-1 items-center gap-3 text-left"
+							className="flex min-w-0 items-center gap-3 text-left"
 						>
-											<span
-												className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-sm font-extrabold text-white ${
-													activeTermKey === groupKey ? "bg-blue-700" : "bg-slate-400"
-												}`}
-											>
-												{termNumber}
-											</span>
 											<div className="min-w-0 flex-1">
 												<h3 className="text-sm font-extrabold text-slate-900">
 													Sem {termNumber}: {displaySemester}
@@ -1787,11 +1850,8 @@ const EducationPlanEditor = () => {
 							title="Delete semester"
 						>
 							<FaTrash className="h-3 w-3" />
-							<span className="hidden sm:inline">Delete Semester</span>
+							<span className="hidden sm:inline">Semester</span>
 						</button>
-							<span className={`rounded-md px-3 py-1 text-xs font-extrabold uppercase ${statusClass}`}>
-								{status}
-							</span>
 						<button
 							type="button"
 							onClick={() => {
@@ -1836,12 +1896,16 @@ const EducationPlanEditor = () => {
 														>
 															<div className="flex items-center gap-3">
 																<div className="min-w-0 flex-1">
-																	<p className="truncate text-sm font-semibold text-slate-900">
-																		{course.courseName}
-																	</p>
+																	<div className="flex min-w-0 items-baseline gap-3">
+																		<p className="min-w-0 truncate text-sm font-semibold text-slate-900">
+																			{course.courseName}
+																		</p>
+																		<span className="shrink-0 text-xs font-medium text-slate-600">
+																			<span className="font-semibold text-slate-800">{course.code}</span>
+																		</span>
+																	</div>
 																	<div className="mt-1 flex flex-wrap gap-x-5 gap-y-1 text-xs font-medium text-slate-600">
-																		<span>Code: <span className="font-semibold text-slate-800">{course.code}</span></span>
-																						<span>Credits: <span className="font-semibold text-slate-800">{course.credits ?? "Not reported"}</span></span>
+																		<span>Credits: <span className="font-semibold text-slate-800">{course.credits ?? "Not reported"}</span></span>
 																		{hasMeaningfulRequirement(prereqText) && (
 																			<span className="text-sky-700">
 																				Pre-requisite: <span className="text-orange-500">{prereqText}</span>
@@ -1878,7 +1942,7 @@ const EducationPlanEditor = () => {
 							})}
 
 			{selectedProgram && selectedUniversity && groupedCourseEntries.length === 0 && (
-				<div className="rounded-lg border border-slate-200 bg-white p-8 text-center text-sm font-semibold text-slate-500 shadow-sm">
+				<div className="col-span-full rounded-lg border border-slate-200 bg-white p-8 text-center text-sm font-semibold text-slate-500 shadow-sm">
 					{yearFilter || semesterFilter
 						? "No semesters match the selected filters."
 						: "Click Add Semester to start building education plan."}
@@ -1886,7 +1950,7 @@ const EducationPlanEditor = () => {
 							)}
 
 							{(!selectedProgram || !selectedUniversity) && (
-								<div className="rounded-lg border border-slate-200 bg-white p-8 text-center text-sm font-semibold text-slate-500 shadow-sm">
+								<div className="col-span-full rounded-lg border border-slate-200 bg-white p-8 text-center text-sm font-semibold text-slate-500 shadow-sm">
 					Select an NNMC program to build your semester plan.
 								</div>
 							)}
