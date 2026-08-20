@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -85,7 +85,7 @@ async def test_save_preferences_updates_existing_preference():
         user_id=1,
         preference_key=CAREER_GOAL,
         preference_value="Cybersecurity",
-        updated_at=datetime(2026, 1, 1, tzinfo=timezone.utc),
+        updated_at=datetime(2026, 1, 1, tzinfo=UTC),
     )
     session = FakeAsyncSession([FakeResult([existing])])
 
@@ -106,7 +106,10 @@ def test_creates_deterministic_memory_summary():
         FinalResponse(message="success"),
     )
 
-    assert summary == "Interested in AI Engineer career. Prefers morning classes. Response status: success."
+    assert (
+        summary
+        == "Interested in AI Engineer career. Prefers morning classes. Response status: success."
+    )
 
 
 @pytest.mark.asyncio

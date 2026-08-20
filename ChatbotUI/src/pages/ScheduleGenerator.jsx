@@ -47,7 +47,6 @@ const ScheduleGenerator = () => {
 			setSchedules(data);
 			setSelectedSchedule(data[0] || null);
 		} catch (err) {
-			console.error(err);
 			setSchedules([]);
 			setSelectedSchedule(null);
 			if (err.response?.status === 401) {
@@ -84,8 +83,7 @@ const ScheduleGenerator = () => {
 		try {
 			const detail = await getGeneratedSchedule(activePlanId, schedule.schedule_id);
 			setSelectedSchedule(detail);
-		} catch (err) {
-			console.error(err);
+		} catch {
 			setDetailError("Unable to load this schedule's full details.");
 		} finally {
 			setLoadingDetail(false);
@@ -113,7 +111,6 @@ const ScheduleGenerator = () => {
 			);
 			setSelectedSchedule(activatedSchedule);
 		} catch (err) {
-			console.error(err);
 			if (err.response?.status === 401) {
 				setDetailError("Please login again to activate this schedule.");
 			} else if (err.response?.status === 404) {

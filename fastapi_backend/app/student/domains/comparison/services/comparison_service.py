@@ -32,7 +32,10 @@ class ComparisonService:
             name=_clean_optional(name),
             limit=_limit(limit),
         )
-        return {"results": universities, "metadata": {"count": len(universities), "source": "nnmc_catalog"}}
+        return {
+            "results": universities,
+            "metadata": {"count": len(universities), "source": "nnmc_catalog"},
+        }
 
     async def compare_universities(self, db: AsyncSession, university_ids: list[str]) -> dict:
         ids = _validate_id_list(university_ids, "university_ids", minimum=2, maximum=5)
@@ -42,7 +45,13 @@ class ComparisonService:
             "metadata": {
                 "requested_count": len(ids),
                 "found_count": len(universities),
-                "unavailable_fields": ["rankings", "tuition", "placement_rates", "acceptance_rates", "scholarships"],
+                "unavailable_fields": [
+                    "rankings",
+                    "tuition",
+                    "placement_rates",
+                    "acceptance_rates",
+                    "scholarships",
+                ],
             },
         }
 
@@ -58,7 +67,10 @@ class ComparisonService:
         if university_id is not None:
             _validate_uuid(university_id, "university_id")
         if degree is None and name is None and university_id is None:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="At least one program search filter is required")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="At least one program search filter is required",
+            )
         programs = await self.repository.search_programs(
             db,
             university_id=_clean_optional(university_id),
@@ -102,11 +114,20 @@ class ComparisonService:
         }
         return {
             "mapped_careers": careers_by_program,
-            "overlapping_careers": [all_careers[career_id] for career_id in sorted(overlap_ids, key=lambda value: all_careers[value]["career_name"])],
+            "overlapping_careers": [
+                all_careers[career_id]
+                for career_id in sorted(
+                    overlap_ids, key=lambda value: all_careers[value]["career_name"]
+                )
+            ],
             "unique_careers": unique_by_program,
             "metadata": {
                 "source_tables": ["careers", "program_careers", "course_careers"],
-                "message": None if any(careers_by_program.values()) else "Career mapping information is not available in the current NNMC catalog.",
+                "message": (
+                    None
+                    if any(careers_by_program.values())
+                    else "Career mapping information is not available in the current NNMC catalog."
+                ),
             },
         }
 
@@ -122,12 +143,20 @@ def _clean_optional(value: str | None) -> str | None:
 
 def _validate_search_filters(**filters: str | None) -> None:
     if not any(_clean_optional(value) for value in filters.values()):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="At least one university search filter is required")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="At least one university search filter is required",
+        )
 
 
-def _validate_id_list(values: list[str], field_name: str, *, minimum: int, maximum: int) -> list[str]:
+def _validate_id_list(
+    values: list[str], field_name: str, *, minimum: int, maximum: int
+) -> list[str]:
     if len(values) < minimum:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"At least {minimum} {field_name} are required")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"At least {minimum} {field_name} are required",
+        )
     selected = values[:maximum]
     for value in selected:
         _validate_uuid(value, field_name.rstrip("s"))
@@ -138,12 +167,17 @@ def _validate_uuid(value: str, field_name: str) -> None:
     try:
         uuid.UUID(str(value))
     except (TypeError, ValueError) as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid {field_name}") from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid {field_name}"
+        ) from exc
 
 
 def _limit(value: int) -> int:
     if value < 1:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="limit must be greater than or equal to 1")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="limit must be greater than or equal to 1",
+        )
     return min(value, 50)
 
 

@@ -20,5 +20,7 @@ async def get_submission(db: AsyncSession, submission_id: int) -> IntakeSubmissi
 
 
 async def list_submissions(db: AsyncSession) -> Sequence[IntakeSubmission]:
-    result = await db.execute(select(IntakeSubmission).order_by(IntakeSubmission.submitted_at.desc()))
+    result = await db.execute(
+        select(IntakeSubmission).order_by(IntakeSubmission.submitted_at.desc())
+    )
     return result.scalars().all()

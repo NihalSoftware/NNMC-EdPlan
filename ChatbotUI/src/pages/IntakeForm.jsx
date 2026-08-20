@@ -2,9 +2,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { INSTITUTION } from "../config/institution.js";
-
-const API_BASE_URL =
-	import.meta.env.VITE_API_BASE_URL || `${window.location.origin}/api`;
+import client from "../services/authService.js";
 
 const US_STATES = [
 	"Alabama",
@@ -80,23 +78,20 @@ const IntakeForm = () => {
 				payload[key] = value;
 			}
 		}
+		payload.consent = formData.has("consent");
 
 		try {
-			const response = await fetch(`${API_BASE_URL}/intake`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(payload),
-			});
-			if (!response.ok) {
-				const detail = await response.text();
-				throw new Error(detail || "Save failed");
-			}
+			await client.post("/intake", payload);
 			toast.success("Form saved!");
 			navigate("/uni");
 		} catch (error) {
-			console.error("Intake submit failed", error);
+			if (error.response?.status === 401) {
+				toast.error("Please sign in before saving your academic history.");
+				navigate("/login");
+				return;
+			}
 			toast.error(
-				"Could not save form. Please try again. If this keeps happening, make sure the backend is running at /api/intake."
+				"Could not save the form. Review the entered values and try again."
 			);
 		}
 	};
@@ -216,20 +211,12 @@ const IntakeForm = () => {
 									You can enter GPA as 4 scale
 								</span>
 							</label>
-							<label className="flex flex-col gap-1.5 text-sm font-medium text-slate-700">
-								<span className="flex items-center gap-1">
-									Upload 12th Grade Marksheet{" "}
-								</span>
-								<input
-									name="marksheet_12th"
-									type="file"
-									accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-									className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
-								/>
+							<div className="flex flex-col gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700">
+								<span className="font-medium">12th Grade Marksheet</span>
 								<span className="text-[13px] text-slate-500">
-									PDF, JPG, PNG, DOC, or DOCX (max 10MB)
+									Bring this document to your advisor. Online document upload is not available.
 								</span>
-							</label>
+							</div>
 							<label className="flex flex-col gap-1.5 text-sm font-medium text-slate-700">
 								Class Rank (if reported)
 								<select
@@ -618,6 +605,7 @@ const IntakeForm = () => {
 							<input
 								name="consent"
 								type="checkbox"
+								value="true"
 								required
 								className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
 							/>

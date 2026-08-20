@@ -12,9 +12,9 @@ from app.models.agentic import ConversationMemory, StudentPreference
 from app.models.education_plan import CourseSchedule, EducationPlan
 from app.models.user import User
 from app.orchestrator.schemas.student_context import StudentContext
-from app.student.domains.planning.models import EdPlan
-from app.student.domains.discovery.models import University
 from app.shared.constants.institution import NORTHERN_NEW_MEXICO_COLLEGE_NAME
+from app.student.domains.discovery.models import University
+from app.student.domains.planning.models import EdPlan
 
 logger = logging.getLogger(__name__)
 
@@ -92,9 +92,7 @@ class ContextLoader:
                 EdPlan.plan_id == plan_id,
                 EdPlan.user_id == user_id,
                 EdPlan.university.has(
-                    University.university_name.ilike(
-                        NORTHERN_NEW_MEXICO_COLLEGE_NAME
-                    )
+                    University.university_name.ilike(NORTHERN_NEW_MEXICO_COLLEGE_NAME)
                 ),
             )
         )
@@ -105,9 +103,7 @@ class ContextLoader:
             select(EducationPlan)
             .where(
                 EducationPlan.user_id == user_id,
-                EducationPlan.university_name.ilike(
-                    NORTHERN_NEW_MEXICO_COLLEGE_NAME
-                ),
+                EducationPlan.university_name.ilike(NORTHERN_NEW_MEXICO_COLLEGE_NAME),
             )
             .options(selectinload(EducationPlan.courses))
             .order_by(EducationPlan.updated_at.desc(), EducationPlan.created_at.desc())

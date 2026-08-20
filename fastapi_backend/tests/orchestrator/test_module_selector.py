@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from app.orchestrator.modules.base_module import BaseModule
-from app.orchestrator.modules.module_registry import ModuleRegistry
 from app.orchestrator.modules.example_module import EXAMPLE_MODULE
+from app.orchestrator.modules.module_registry import ModuleRegistry
 from app.orchestrator.router.module_selector import ACADEMIC_PLANNING, CAREER, ModuleSelector
 from app.orchestrator.schemas.intent_result import IntentResult
 from app.orchestrator.schemas.module_response import ModuleResponse

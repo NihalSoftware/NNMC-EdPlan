@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import uuid
 from collections import Counter, defaultdict
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from datetime import date
-from typing import Iterable, Sequence
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
@@ -13,6 +13,7 @@ from sqlalchemy.orm import joinedload, selectinload
 
 # Initialize Base metadata before importing model packages from a cold route import.
 from app.db.base import Base as _Base  # noqa: F401
+from app.shared.constants.institution import NORTHERN_NEW_MEXICO_COLLEGE_NAME
 from app.student.domains.discovery.models import (
     Course,
     CourseCorequisite,
@@ -27,7 +28,6 @@ from app.student.domains.planning.schemas.planning_validation import (
 )
 from app.student.domains.planning.services.normalized_plan_service import MAX_TERM_CREDITS
 from app.student.domains.scheduling.models import AcademicTerm
-from app.shared.constants.institution import NORTHERN_NEW_MEXICO_COLLEGE_NAME
 
 
 def _parse_uuid(value: str, field_name: str) -> uuid.UUID:
@@ -62,9 +62,7 @@ class PlanningValidationRepository:
             .where(
                 EdPlan.plan_id == plan_id,
                 EdPlan.university.has(
-                    University.university_name.ilike(
-                        NORTHERN_NEW_MEXICO_COLLEGE_NAME
-                    )
+                    University.university_name.ilike(NORTHERN_NEW_MEXICO_COLLEGE_NAME)
                 ),
             )
         )
@@ -76,9 +74,7 @@ class PlanningValidationRepository:
                 Course.course_id == course_id,
                 Course.program.has(
                     Program.university.has(
-                        University.university_name.ilike(
-                            NORTHERN_NEW_MEXICO_COLLEGE_NAME
-                        )
+                        University.university_name.ilike(NORTHERN_NEW_MEXICO_COLLEGE_NAME)
                     )
                 ),
             )
@@ -453,9 +449,7 @@ def _issue(
 def _validation_result(plan_id: uuid.UUID, issues: list[dict]) -> dict:
     error_count = sum(1 for issue in issues if issue["severity"] == "error")
     warning_count = sum(1 for issue in issues if issue["severity"] == "warning")
-    recommendation_count = sum(
-        1 for issue in issues if issue["severity"] == "recommendation"
-    )
+    recommendation_count = sum(1 for issue in issues if issue["severity"] == "recommendation")
     return {
         "plan_id": str(plan_id),
         "is_valid": error_count == 0,

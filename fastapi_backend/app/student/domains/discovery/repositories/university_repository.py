@@ -5,11 +5,11 @@ import uuid
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.student.domains.discovery.models import University
 from app.shared.constants.institution import (
     NORTHERN_NEW_MEXICO_COLLEGE_NAME,
     state_filter_aliases,
 )
+from app.student.domains.discovery.models import University
 
 
 class UniversityRepository:
@@ -36,9 +36,7 @@ class UniversityRepository:
             )
         if state:
             aliases = state_filter_aliases(state)
-            statement = statement.where(
-                or_(*(University.state.ilike(alias) for alias in aliases))
-            )
+            statement = statement.where(or_(*(University.state.ilike(alias) for alias in aliases)))
 
         statement = statement.order_by(University.university_name).offset(offset).limit(limit)
         result = await db.execute(statement)

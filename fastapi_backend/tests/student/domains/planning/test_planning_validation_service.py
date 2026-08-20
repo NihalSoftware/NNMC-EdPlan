@@ -104,10 +104,12 @@ def _corequisite(course, corequisite):
 def test_validate_plan_returns_all_duplicate_and_credit_issues():
     heavy_course = _course("CS 401", credits=10)
     fall = _term("Fall 2026", date(2026, 8, 17), date(2026, 12, 11))
-    plan = _plan([
-        _plan_course(heavy_course, fall),
-        _plan_course(heavy_course, fall),
-    ])
+    plan = _plan(
+        [
+            _plan_course(heavy_course, fall),
+            _plan_course(heavy_course, fall),
+        ]
+    )
     service = PlanningValidationService(_Repository(plan=plan))
 
     result = asyncio.run(service.validate_plan(object(), str(plan.plan_id)))
@@ -127,10 +129,12 @@ def test_projected_prerequisite_in_earlier_term_satisfies_future_course():
     advanced = _course("CS 201")
     fall = _term("Fall 2026", date(2026, 8, 17), date(2026, 12, 11))
     spring = _term("Spring 2027", date(2027, 1, 12), date(2027, 5, 8))
-    plan = _plan([
-        _plan_course(intro, fall),
-        _plan_course(advanced, spring),
-    ])
+    plan = _plan(
+        [
+            _plan_course(intro, fall),
+            _plan_course(advanced, spring),
+        ]
+    )
     repository = _Repository(
         plan=plan,
         prerequisites=[_prerequisite(advanced, intro)],
@@ -147,10 +151,12 @@ def test_prerequisite_in_same_term_returns_error():
     intro = _course("CS 101")
     advanced = _course("CS 201")
     fall = _term("Fall 2026", date(2026, 8, 17), date(2026, 12, 11))
-    plan = _plan([
-        _plan_course(intro, fall),
-        _plan_course(advanced, fall),
-    ])
+    plan = _plan(
+        [
+            _plan_course(intro, fall),
+            _plan_course(advanced, fall),
+        ]
+    )
     service = PlanningValidationService(
         _Repository(plan=plan, prerequisites=[_prerequisite(advanced, intro)])
     )
@@ -168,10 +174,12 @@ def test_corequisite_must_be_scheduled_in_same_term():
     lab = _course("CHEM 121L")
     fall = _term("Fall 2026", date(2026, 8, 17), date(2026, 12, 11))
     spring = _term("Spring 2027", date(2027, 1, 12), date(2027, 5, 8))
-    plan = _plan([
-        _plan_course(lecture, fall),
-        _plan_course(lab, spring),
-    ])
+    plan = _plan(
+        [
+            _plan_course(lecture, fall),
+            _plan_course(lab, spring),
+        ]
+    )
     service = PlanningValidationService(
         _Repository(plan=plan, corequisites=[_corequisite(lecture, lab)])
     )

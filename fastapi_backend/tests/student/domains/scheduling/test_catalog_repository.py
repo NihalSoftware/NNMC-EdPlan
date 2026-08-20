@@ -154,9 +154,7 @@ def test_offering_repository_lists_course_offerings():
     repository = CourseOfferingRepository()
     session = _Session([offering])
 
-    result = asyncio.run(
-        repository.list_offerings_by_course(session, str(offering.course_id))
-    )
+    result = asyncio.run(repository.list_offerings_by_course(session, str(offering.course_id)))
 
     assert result[0]["offering_id"] == str(offering.offering_id)
     assert result[0]["course"]["course_code"] == "CS 101"
@@ -192,9 +190,7 @@ def test_section_meeting_repository_lists_meetings():
     repository = SectionMeetingRepository()
     session = _Session([meeting])
 
-    result = asyncio.run(
-        repository.list_meetings_by_section(session, str(section.section_id))
-    )
+    result = asyncio.run(repository.list_meetings_by_section(session, str(section.section_id)))
 
     assert result == [
         {

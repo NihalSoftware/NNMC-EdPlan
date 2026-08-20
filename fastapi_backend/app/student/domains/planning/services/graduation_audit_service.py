@@ -30,10 +30,18 @@ class GraduationAuditService:
     ) -> None:
         self.repository = repository or graduation_audit_repository
 
-    async def get_audit(self, db: AsyncSession, plan_id: str) -> dict:
+    async def get_audit(
+        self,
+        db: AsyncSession,
+        plan_id: str,
+        *,
+        expected_user_id: int | None = None,
+    ) -> dict:
         parsed_plan_id = _parse_uuid(plan_id, "plan_id")
         plan = await self.repository.get_plan(db, parsed_plan_id)
         if not plan:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Plan not found")
+        if expected_user_id is not None and plan.user_id != expected_user_id:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Plan not found")
         if not plan.program:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Program not found")
@@ -92,9 +100,7 @@ def _build_audit(plan: EdPlan, catalog_courses: list[Course]) -> dict:
 
 def _planned_credits(plan_courses: list[PlanCourse]) -> int:
     return sum(
-        plan_course.course.credits
-        for plan_course in plan_courses
-        if plan_course.course is not None
+        plan_course.course.credits for plan_course in plan_courses if plan_course.course is not None
     )
 
 

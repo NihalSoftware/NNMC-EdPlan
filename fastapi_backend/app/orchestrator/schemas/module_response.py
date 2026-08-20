@@ -21,4 +21,3 @@ class FinalResponse(BaseModel):
     message: str
     module_responses: list[ModuleResponse] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
-

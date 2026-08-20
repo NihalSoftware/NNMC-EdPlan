@@ -205,8 +205,7 @@ const CareerProgramPage = () => {
 				if (!active) return;
 				setCareers(buildCareerRecords(catalog, employers));
 			})
-			.catch((catalogError) => {
-				console.error("Unable to load career catalog", catalogError);
+			.catch(() => {
 				if (!active) return;
 				setCareers([]);
 				setError("Career data is currently unavailable.");

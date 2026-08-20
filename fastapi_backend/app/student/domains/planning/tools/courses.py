@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from app.student.domains.planning.schemas.normalized_plan import (
     PlanCourseCreateRequest,
@@ -53,12 +52,12 @@ class AddCourseTool:
         "additionalProperties": False,
     }
 
-    def __init__(self, service: "NormalizedPlanService | None" = None) -> None:
+    def __init__(self, service: NormalizedPlanService | None = None) -> None:
         self.service = service
 
     async def execute(
         self,
-        db: "AsyncSession",
+        db: AsyncSession,
         plan_id: str,
         payload: PlanCourseCreateRequest | dict[str, Any],
     ) -> dict:
@@ -87,12 +86,12 @@ class RemoveCourseTool:
         "additionalProperties": False,
     }
 
-    def __init__(self, service: "NormalizedPlanService | None" = None) -> None:
+    def __init__(self, service: NormalizedPlanService | None = None) -> None:
         self.service = service
 
-    async def execute(self, db: "AsyncSession", plan_id: str, course_id: str) -> None:
+    async def execute(self, db: AsyncSession, plan_id: str, course_id: str) -> None:
         service = self.service or _default_service()
-        return await service.delete_plan_course(db, plan_id, course_id)
+        await service.delete_plan_course(db, plan_id, course_id)
 
 
 class MoveCourseTool:
@@ -122,12 +121,12 @@ class MoveCourseTool:
         "additionalProperties": False,
     }
 
-    def __init__(self, service: "NormalizedPlanService | None" = None) -> None:
+    def __init__(self, service: NormalizedPlanService | None = None) -> None:
         self.service = service
 
     async def execute(
         self,
-        db: "AsyncSession",
+        db: AsyncSession,
         plan_id: str,
         course_id: str,
         payload: PlanCourseUpdateRequest | dict[str, Any],

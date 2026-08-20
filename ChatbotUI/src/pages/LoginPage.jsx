@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login, register } from "../services/authService.js";
-import { save as saveStorage } from "../utils/storage.js";
+import { save as saveStorage, saveSession } from "../utils/storage.js";
 import toast from "react-hot-toast";
 import { INSTITUTION } from "../config/institution.js";
 
@@ -35,6 +35,10 @@ const LoginPage = ({ initialMode = "login" }) => {
 			setError("Please enter a valid email address.");
 			return;
 		}
+		if (!isLogin && form.password.length < 12) {
+			setError("Create a password with at least 12 characters.");
+			return;
+		}
 		try {
 			if (isLogin) {
 				const response = await login({
@@ -44,7 +48,7 @@ const LoginPage = ({ initialMode = "login" }) => {
 				const { success, data, message } = response.data || {};
 				if (success) {
 					if (data?.bearer_token) {
-						saveStorage("AuthToken", data.bearer_token);
+						saveSession("AuthToken", data.bearer_token);
 					}
 					if (data) {
 						saveStorage("UserProfile", data);
@@ -73,7 +77,6 @@ const LoginPage = ({ initialMode = "login" }) => {
 				setError(message || "Registration failed.");
 			}
 		} catch (err) {
-			console.error(err);
 			const serverMessage =
 				err.response?.data?.message ||
 				err.response?.data?.detail ||
@@ -148,7 +151,7 @@ const LoginPage = ({ initialMode = "login" }) => {
 							name="email"
 							value={form.email}
 							onChange={handleChange}
-							placeholder="jackvigil@gmail.com"
+							placeholder="student@nnmc.edu"
 							autoCapitalize="none"
 							autoCorrect="off"
 							pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$"
@@ -163,7 +166,10 @@ const LoginPage = ({ initialMode = "login" }) => {
 							<span className="font-semibold">Contact Number</span>
 							<input
 								name="phoneNumber"
-								type= "number"
+							type="tel"
+							autoComplete="tel"
+							minLength={7}
+							maxLength={32}
 								value={form.phoneNumber}
 								onChange={handleChange}
 								className="w-full px-3 py-2 rounded-lg border border-slate-200"
@@ -180,9 +186,17 @@ const LoginPage = ({ initialMode = "login" }) => {
 							value={form.password}
 							onChange={handleChange}
 							placeholder="********"
+							autoComplete={isLogin ? "current-password" : "new-password"}
+							minLength={isLogin ? 1 : 12}
+							maxLength={128}
 							className="w-full px-3 py-2 rounded-lg border border-slate-200"
 							required
 						/>
+						{!isLogin && (
+							<span className="block text-xs text-slate-500">
+								Use at least 12 characters.
+							</span>
+						)}
 					</label>
 
 					<button

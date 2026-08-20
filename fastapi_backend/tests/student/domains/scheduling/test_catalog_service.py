@@ -32,15 +32,11 @@ class _OfferingRepository:
         self.offering = {"offering_id": str(uuid.uuid4()), "offering_type": "Lecture"}
 
     async def list_offerings_by_course(self, db, course_id):
-        self.calls.append(
-            {"method": "list_offerings_by_course", "course_id": course_id}
-        )
+        self.calls.append({"method": "list_offerings_by_course", "course_id": course_id})
         return [self.offering]
 
     async def get_offering_by_id(self, db, offering_id):
-        self.calls.append(
-            {"method": "get_offering_by_id", "offering_id": offering_id}
-        )
+        self.calls.append({"method": "get_offering_by_id", "offering_id": offering_id})
         return self.offering
 
 
@@ -50,9 +46,7 @@ class _SectionRepository:
         self.section = {"section_id": str(uuid.uuid4()), "section_number": "001"}
 
     async def list_sections_by_offering(self, db, offering_id):
-        self.calls.append(
-            {"method": "list_sections_by_offering", "offering_id": offering_id}
-        )
+        self.calls.append({"method": "list_sections_by_offering", "offering_id": offering_id})
         return [self.section]
 
     async def get_section_by_id(self, db, section_id):
@@ -66,9 +60,7 @@ class _MeetingRepository:
         self.meeting = {"meeting_id": str(uuid.uuid4()), "meeting_type": "Class"}
 
     async def list_meetings_by_section(self, db, section_id):
-        self.calls.append(
-            {"method": "list_meetings_by_section", "section_id": section_id}
-        )
+        self.calls.append({"method": "list_meetings_by_section", "section_id": section_id})
         return [self.meeting]
 
 
@@ -101,17 +93,13 @@ def test_offering_service_delegates_course_offering_lookup():
     result = asyncio.run(service.list_offerings_by_course(object(), course_id))
 
     assert result == [repository.offering]
-    assert repository.calls == [
-        {"method": "list_offerings_by_course", "course_id": course_id}
-    ]
+    assert repository.calls == [{"method": "list_offerings_by_course", "course_id": course_id}]
 
 
 def test_offering_service_raises_404_when_missing():
     class _MissingRepository(_OfferingRepository):
         async def get_offering_by_id(self, db, offering_id):
-            self.calls.append(
-                {"method": "get_offering_by_id", "offering_id": offering_id}
-            )
+            self.calls.append({"method": "get_offering_by_id", "offering_id": offering_id})
             return None
 
     repository = _MissingRepository()
@@ -142,9 +130,7 @@ def test_section_meeting_service_delegates_meeting_lookup():
     result = asyncio.run(service.list_meetings_by_section(object(), section_id))
 
     assert result == [repository.meeting]
-    assert repository.calls == [
-        {"method": "list_meetings_by_section", "section_id": section_id}
-    ]
+    assert repository.calls == [{"method": "list_meetings_by_section", "section_id": section_id}]
 
 
 def test_section_meeting_service_rejects_invalid_uuid():

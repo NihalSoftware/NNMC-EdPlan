@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import List
 
 from sqlalchemy import (
     Boolean,
@@ -94,7 +93,7 @@ class EdPlan(Base):
         foreign_keys=lambda: [EdPlan.program_id, EdPlan.university_id],
         viewonly=True,
     )
-    courses: Mapped[List["PlanCourse"]] = relationship(
+    courses: Mapped[list[PlanCourse]] = relationship(
         back_populates="plan",
         cascade="all, delete-orphan",
     )

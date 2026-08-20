@@ -1,9 +1,13 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Query
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
+from app.models.user import User
+from app.security.auth import get_current_user
 from app.student.domains.planning.schemas.normalized_plan import (
     PlanCourseCreateRequest,
     PlanCourseDeleteResponse,
@@ -33,13 +37,19 @@ router = APIRouter(prefix="/plans", tags=["plans"])
 
 @router.get("", response_model=PlanListResponse)
 async def list_plans(
+    current_user: Annotated[User, Depends(get_current_user)],
     user_id: int | None = Query(default=None, gt=0),
     is_active: bool | None = None,
     db: AsyncSession = Depends(get_db),
 ):
+    if user_id is not None and user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only list your own plans.",
+        )
     plans = await normalized_plan_service.list_plans(
         db,
-        user_id=user_id,
+        user_id=current_user.id,
         is_active=is_active,
     )
     return _success(plans, metadata={"count": len(plans)})
@@ -48,15 +58,25 @@ async def list_plans(
 @router.post("", response_model=PlanDetailResponse)
 async def create_plan(
     request: PlanCreateRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
     db: AsyncSession = Depends(get_db),
 ):
+    if request.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only create plans for your own account.",
+        )
     plan = await normalized_plan_service.create_plan(db, request)
     return _success(plan)
 
 
 @router.get("/{plan_id}", response_model=PlanDetailResponse)
-async def get_plan(plan_id: str, db: AsyncSession = Depends(get_db)):
-    plan = await normalized_plan_service.get_plan_by_id(db, plan_id)
+async def get_plan(
+    plan_id: str,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db),
+):
+    plan = await _require_owned_plan(db, plan_id, current_user)
     return _success(plan)
 
 
@@ -64,14 +84,21 @@ async def get_plan(plan_id: str, db: AsyncSession = Depends(get_db)):
 async def update_plan(
     plan_id: str,
     request: PlanUpdateRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
     db: AsyncSession = Depends(get_db),
 ):
+    await _require_owned_plan(db, plan_id, current_user)
     plan = await normalized_plan_service.update_plan(db, plan_id, request)
     return _success(plan)
 
 
 @router.delete("/{plan_id}", response_model=PlanDetailResponse)
-async def deactivate_plan(plan_id: str, db: AsyncSession = Depends(get_db)):
+async def deactivate_plan(
+    plan_id: str,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db),
+):
+    await _require_owned_plan(db, plan_id, current_user)
     plan = await normalized_plan_service.deactivate_plan(db, plan_id)
     return _success(plan)
 
@@ -79,9 +106,11 @@ async def deactivate_plan(plan_id: str, db: AsyncSession = Depends(get_db)):
 @router.post("/{plan_id}/validate", response_model=PlanValidationResponse)
 async def validate_plan(
     plan_id: str,
+    current_user: Annotated[User, Depends(get_current_user)],
     request: PlanValidationRequest | None = None,
     db: AsyncSession = Depends(get_db),
 ):
+    await _require_owned_plan(db, plan_id, current_user)
     validation = await planning_validation_service.validate_plan(db, plan_id, request)
     return _success(validation)
 
@@ -90,14 +119,21 @@ async def validate_plan(
 async def validate_plan_course(
     plan_id: str,
     request: PlanCourseValidationRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
     db: AsyncSession = Depends(get_db),
 ):
+    await _require_owned_plan(db, plan_id, current_user)
     validation = await planning_validation_service.validate_course(db, plan_id, request)
     return _success(validation)
 
 
 @router.get("/{plan_id}/courses", response_model=PlanCourseListResponse)
-async def list_plan_courses(plan_id: str, db: AsyncSession = Depends(get_db)):
+async def list_plan_courses(
+    plan_id: str,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db),
+):
+    await _require_owned_plan(db, plan_id, current_user)
     courses = await normalized_plan_service.list_plan_courses(db, plan_id)
     return _success(
         courses,
@@ -113,8 +149,10 @@ async def list_plan_courses(plan_id: str, db: AsyncSession = Depends(get_db)):
 async def add_plan_course(
     plan_id: str,
     request: PlanCourseCreateRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
     db: AsyncSession = Depends(get_db),
 ):
+    await _require_owned_plan(db, plan_id, current_user)
     plan_course = await normalized_plan_service.add_plan_course(db, plan_id, request)
     return _success(plan_course, metadata={"max_term_credits": MAX_TERM_CREDITS})
 
@@ -124,8 +162,10 @@ async def update_plan_course(
     plan_id: str,
     course_id: str,
     request: PlanCourseUpdateRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
     db: AsyncSession = Depends(get_db),
 ):
+    await _require_owned_plan(db, plan_id, current_user)
     plan_course = await normalized_plan_service.update_plan_course(
         db,
         plan_id,
@@ -139,8 +179,10 @@ async def update_plan_course(
 async def delete_plan_course(
     plan_id: str,
     course_id: str,
+    current_user: Annotated[User, Depends(get_current_user)],
     db: AsyncSession = Depends(get_db),
 ):
+    await _require_owned_plan(db, plan_id, current_user)
     await normalized_plan_service.delete_plan_course(db, plan_id, course_id)
     return _success(None, metadata={"plan_id": plan_id, "course_id": course_id})
 
@@ -150,6 +192,16 @@ def _success(data, *, metadata: dict | None = None) -> dict:
     if metadata is not None:
         response["metadata"] = metadata
     return response
+
+
+async def _require_owned_plan(db: AsyncSession, plan_id: str, current_user: User) -> dict:
+    plan = await normalized_plan_service.get_plan_by_id(db, plan_id)
+    if plan.get("user_id") != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Plan not found",
+        )
+    return plan
 
 
 def _term_credit_totals(courses: list[dict]) -> list[dict]:

@@ -5,8 +5,8 @@ from app.orchestrator.context.context_loader import (
     ContextLoaderError,
     PlanNotFoundError,
     ProgramNotFoundError,
-    UserNotFoundError,
     UniversityNotFoundError,
+    UserNotFoundError,
 )
 
 __all__ = [

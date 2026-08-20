@@ -33,9 +33,9 @@ class AuditPlanTool:
         "additionalProperties": False,
     }
 
-    def __init__(self, service: "GraduationAuditService | None" = None) -> None:
+    def __init__(self, service: GraduationAuditService | None = None) -> None:
         self.service = service
 
-    async def execute(self, db: "AsyncSession", plan_id: str) -> dict:
+    async def execute(self, db: AsyncSession, plan_id: str) -> dict:
         service = self.service or _default_service()
         return await service.get_audit(db, plan_id)

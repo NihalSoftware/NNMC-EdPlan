@@ -92,7 +92,9 @@ class OpenRouterProvider(BaseLLMProvider):
     def build_request_payload(self, request: LLMRequest) -> dict[str, Any]:
         messages = [message.model_dump(mode="json") for message in request.messages]
         if request.system_prompt:
-            messages = [{"role": "system", "content": request.system_prompt, "metadata": {}}] + messages
+            messages = [
+                {"role": "system", "content": request.system_prompt, "metadata": {}}
+            ] + messages
 
         payload: dict[str, Any] = {
             "model": request.model or self.model_config.primary_model,
@@ -103,7 +105,9 @@ class OpenRouterProvider(BaseLLMProvider):
                 else self.model_config.temperature
             ),
             "max_tokens": (
-                request.max_tokens if request.max_tokens is not None else self.model_config.max_tokens
+                request.max_tokens
+                if request.max_tokens is not None
+                else self.model_config.max_tokens
             ),
             "metadata": request.metadata,
         }

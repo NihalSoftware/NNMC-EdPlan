@@ -85,8 +85,7 @@ def _explanation(candidate: ScheduleCandidate) -> str:
 
     if score >= 75:
         return (
-            "This schedule ranked highly because it satisfies most of your stated "
-            "preferences."
+            "This schedule ranked highly because it satisfies most of your stated " "preferences."
         )
     if score >= 50 and satisfied_count >= violated_count:
         return (

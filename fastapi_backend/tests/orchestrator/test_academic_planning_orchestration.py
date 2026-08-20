@@ -139,8 +139,7 @@ async def test_orchestrator_executes_academic_planning_add_course_tool_end_to_en
     assert response.module_responses[0].module_name == ACADEMIC_PLANNING
     assert response.module_responses[0].metadata["tool_invoked"] == "add_course"
     assert (
-        response.module_responses[0].content
-        == "I added the course and confirmed the plan update."
+        response.module_responses[0].content == "I added the course and confirmed the plan update."
     )
     assert response.module_responses[0].data["observations"][0]["result"] == {
         "plan_id": str(plan_id),

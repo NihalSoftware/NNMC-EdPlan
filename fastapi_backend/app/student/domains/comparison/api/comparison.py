@@ -22,7 +22,9 @@ async def search_universities(request: UniversitySearchRequest, db: AsyncSession
 
 
 @router.post("/universities/compare")
-async def compare_universities(request: UniversityCompareRequest, db: AsyncSession = Depends(get_db)):
+async def compare_universities(
+    request: UniversityCompareRequest, db: AsyncSession = Depends(get_db)
+):
     return _success(await comparison_service.compare_universities(db, request.university_ids))
 
 
@@ -37,7 +39,9 @@ async def compare_programs(request: ProgramCompareRequest, db: AsyncSession = De
 
 
 @router.post("/careers/compare")
-async def compare_career_paths(request: CareerPathCompareRequest, db: AsyncSession = Depends(get_db)):
+async def compare_career_paths(
+    request: CareerPathCompareRequest, db: AsyncSession = Depends(get_db)
+):
     return _success(await comparison_service.compare_career_paths(db, request.program_ids))
 
 

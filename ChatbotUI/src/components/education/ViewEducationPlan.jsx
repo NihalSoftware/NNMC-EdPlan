@@ -170,7 +170,6 @@ const ViewEducationPlan = () => {
 
 			setSavedPlans([...remotePlans, ...localPlans]);
 		} catch (err) {
-			console.error(err);
 			if (err.response?.status === 401) {
 				setError(
 					"Your session has expired. Please login again to view saved plans."
@@ -192,7 +191,7 @@ const ViewEducationPlan = () => {
 	useEffect(() => {
 		listPrograms()
 			.then((items) => setProgramCatalogue(items))
-			.catch((err) => console.error("Unable to load program catalogue", err));
+			.catch(() => setProgramCatalogue([]));
 	}, []);
 
 	const getTotalCredits = (courses) => {
@@ -266,7 +265,6 @@ const ViewEducationPlan = () => {
 			});
 			setSavedPlans((prev) => prev.filter((item) => item.id !== plan.id));
 		} catch (err) {
-			console.error(err);
 			if (err.response?.status === 401) {
 				setError(
 					"Your session has expired. Please login again to manage saved plans."

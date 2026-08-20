@@ -2,7 +2,7 @@ export const CAREER_CATALOG_URL = "/assets/career_program_data.json";
 export const CAREER_EMPLOYERS_URL = "/assets/career_employers.json";
 
 const fetchJson = async (url) => {
-	const response = await fetch(url);
+	const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
 	if (!response.ok) throw new Error(`Unable to load ${url}`);
 	return response.json();
 };

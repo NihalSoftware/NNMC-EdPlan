@@ -54,10 +54,10 @@ class GetRemainingCoursesTool:
         "additionalProperties": False,
     }
 
-    def __init__(self, service: "GraduationAuditService | None" = None) -> None:
+    def __init__(self, service: GraduationAuditService | None = None) -> None:
         self.service = service
 
-    async def execute(self, db: "AsyncSession", plan_id: str) -> dict:
+    async def execute(self, db: AsyncSession, plan_id: str) -> dict:
         audit = await (self.service or _audit_service()).get_audit(db, plan_id)
         return {
             "plan_id": audit.get("plan_id"),
@@ -82,10 +82,10 @@ class GetCourseDetailsTool:
         "additionalProperties": False,
     }
 
-    def __init__(self, service: "CourseService | None" = None) -> None:
+    def __init__(self, service: CourseService | None = None) -> None:
         self.service = service
 
-    async def execute(self, db: "AsyncSession", course_id: str) -> dict:
+    async def execute(self, db: AsyncSession, course_id: str) -> dict:
         return await (self.service or _course_service()).get_course_by_id(db, course_id)
 
 
@@ -103,10 +103,10 @@ class GetPrerequisitesTool:
         "additionalProperties": False,
     }
 
-    def __init__(self, service: "CourseService | None" = None) -> None:
+    def __init__(self, service: CourseService | None = None) -> None:
         self.service = service
 
-    async def execute(self, db: "AsyncSession", course_id: str) -> list[dict]:
+    async def execute(self, db: AsyncSession, course_id: str) -> list[dict]:
         return await (self.service or _course_service()).list_prerequisites(db, course_id)
 
 
@@ -124,10 +124,10 @@ class GetCorequisitesTool:
         "additionalProperties": False,
     }
 
-    def __init__(self, service: "CourseService | None" = None) -> None:
+    def __init__(self, service: CourseService | None = None) -> None:
         self.service = service
 
-    async def execute(self, db: "AsyncSession", course_id: str) -> list[dict]:
+    async def execute(self, db: AsyncSession, course_id: str) -> list[dict]:
         return await (self.service or _course_service()).list_corequisites(db, course_id)
 
 
@@ -145,10 +145,10 @@ class GetProgramRequirementsTool:
         "additionalProperties": False,
     }
 
-    def __init__(self, service: "ProgramService | None" = None) -> None:
+    def __init__(self, service: ProgramService | None = None) -> None:
         self.service = service
 
-    async def execute(self, db: "AsyncSession", program_id: str) -> dict:
+    async def execute(self, db: AsyncSession, program_id: str) -> dict:
         return await (self.service or _program_service()).get_program_by_id(db, program_id)
 
 
@@ -165,8 +165,8 @@ class GetAvailableTermsTool:
         "additionalProperties": False,
     }
 
-    def __init__(self, service: "TermService | None" = None) -> None:
+    def __init__(self, service: TermService | None = None) -> None:
         self.service = service
 
-    async def execute(self, db: "AsyncSession") -> list[dict]:
+    async def execute(self, db: AsyncSession) -> list[dict]:
         return await (self.service or _term_service()).list_terms(db)

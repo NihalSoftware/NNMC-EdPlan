@@ -5,4 +5,3 @@ from app.orchestrator.modules.example_module import EXAMPLE_MODULE, ExampleModul
 from app.orchestrator.modules.module_registry import ModuleRegistry
 
 __all__ = ["BaseModule", "EXAMPLE_MODULE", "ExampleModule", "ModuleRegistry"]
-

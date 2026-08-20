@@ -30,7 +30,7 @@ class GetStudentPlanTool(_RetrievalTool):
         "additionalProperties": False,
     }
 
-    async def execute(self, db: "AsyncSession", *, user_id: int, plan_id: str):
+    async def execute(self, db: AsyncSession, *, user_id: int, plan_id: str):
         return await self.service.get_student_plan(db, user_id=user_id, plan_id=plan_id)
 
 
@@ -44,7 +44,7 @@ class GetPlanCoursesTool(_RetrievalTool):
         "additionalProperties": False,
     }
 
-    async def execute(self, db: "AsyncSession", *, plan_id: str):
+    async def execute(self, db: AsyncSession, *, plan_id: str):
         return await self.service.get_plan_courses(db, plan_id=plan_id)
 
 
@@ -53,7 +53,7 @@ class GetAvailableTermsTool(_RetrievalTool):
     description = "Read active academic terms available for scheduling."
     parameters = {"type": "object", "properties": {}, "additionalProperties": False}
 
-    async def execute(self, db: "AsyncSession"):
+    async def execute(self, db: AsyncSession):
         return await self.service.get_available_terms(db)
 
 
@@ -67,7 +67,7 @@ class GetCourseOfferingsTool(_RetrievalTool):
         "additionalProperties": False,
     }
 
-    async def execute(self, db: "AsyncSession", *, course_ids: list[str]):
+    async def execute(self, db: AsyncSession, *, course_ids: list[str]):
         return await self.service.get_course_offerings(db, course_ids=course_ids)
 
 
@@ -81,7 +81,7 @@ class GetCourseSectionsTool(_RetrievalTool):
         "additionalProperties": False,
     }
 
-    async def execute(self, db: "AsyncSession", *, offering_ids: list[str]):
+    async def execute(self, db: AsyncSession, *, offering_ids: list[str]):
         return await self.service.get_course_sections(db, offering_ids=offering_ids)
 
 
@@ -95,5 +95,5 @@ class GetSectionMeetingsTool(_RetrievalTool):
         "additionalProperties": False,
     }
 
-    async def execute(self, db: "AsyncSession", *, section_ids: list[str]):
+    async def execute(self, db: AsyncSession, *, section_ids: list[str]):
         return await self.service.get_section_meetings(db, section_ids=section_ids)

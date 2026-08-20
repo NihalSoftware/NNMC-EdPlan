@@ -19,10 +19,13 @@ from app.orchestrator.schemas.student_context import StudentContext
 from app.student.domains.comparison.tools.registry import COMPARISON_TOOLS
 
 MODULE_NAME = "college_comparison"
-MODULE_DESCRIPTION = "Help students compare Northern New Mexico College academic programs using existing NNMC data."
+MODULE_DESCRIPTION = (
+    "Help students compare Northern New Mexico College academic programs using existing NNMC data."
+)
 
 COMPARISON_ADVISOR_PROMPT = (
-    "You are Northern New Mexico College's Program Comparison Advisor. Compare only factual information from "
+    "You are Northern New Mexico College's Program Comparison Advisor. "
+    "Compare only factual information from "
     "the current NNMC catalog and the exposed program comparison tools. Never invent "
     "tuition, placement rates, acceptance rates, rankings, salaries, scholarships, or "
     "institution scores. Compare NNMC programs, not institutions. Explain objective tradeoffs "
@@ -136,7 +139,8 @@ class CollegeComparisonModule(BaseModule):
                     role="user",
                     content=(
                         f"Tool execution stopped because {stop_reason}. Provide the best factual "
-                        "program comparison from the observations already gathered. If critical information "
+                        "program comparison from the observations already gathered. "
+                        "If critical information "
                         "is missing, say it is not available in the current NNMC catalog or ask "
                         "for the missing filters."
                     ),
@@ -241,9 +245,17 @@ class CollegeComparisonModule(BaseModule):
     async def _execute_tool_call(self, tool_call: dict[str, Any]) -> dict[str, Any]:
         tool_name = tool_call["name"]
         if tool_name not in self.tools or tool_name not in SUPPORTED_TOOL_NAMES:
-            return {"tool": tool_name, "success": False, "error": "Tool is not exposed to college comparison."}
+            return {
+                "tool": tool_name,
+                "success": False,
+                "error": "Tool is not exposed to college comparison.",
+            }
         if self.db is None:
-            return {"tool": tool_name, "success": False, "error": "CollegeComparisonModule requires a database session."}
+            return {
+                "tool": tool_name,
+                "success": False,
+                "error": "CollegeComparisonModule requires a database session.",
+            }
 
         command = dict(tool_call["arguments"])
         try:

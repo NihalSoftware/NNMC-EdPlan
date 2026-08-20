@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from app.student.domains.planning.schemas.normalized_plan import (
     PlanCreateRequest,
@@ -53,12 +52,12 @@ class CreatePlanTool:
         "additionalProperties": False,
     }
 
-    def __init__(self, service: "NormalizedPlanService | None" = None) -> None:
+    def __init__(self, service: NormalizedPlanService | None = None) -> None:
         self.service = service
 
     async def execute(
         self,
-        db: "AsyncSession",
+        db: AsyncSession,
         payload: PlanCreateRequest | dict[str, Any],
     ) -> dict:
         service = self.service or _default_service()
@@ -90,12 +89,12 @@ class UpdatePlanTool:
         "additionalProperties": False,
     }
 
-    def __init__(self, service: "NormalizedPlanService | None" = None) -> None:
+    def __init__(self, service: NormalizedPlanService | None = None) -> None:
         self.service = service
 
     async def execute(
         self,
-        db: "AsyncSession",
+        db: AsyncSession,
         plan_id: str,
         payload: PlanUpdateRequest | dict[str, Any],
     ) -> dict:
@@ -121,10 +120,10 @@ class DeletePlanTool:
         "additionalProperties": False,
     }
 
-    def __init__(self, service: "NormalizedPlanService | None" = None) -> None:
+    def __init__(self, service: NormalizedPlanService | None = None) -> None:
         self.service = service
 
-    async def execute(self, db: "AsyncSession", plan_id: str) -> dict:
+    async def execute(self, db: AsyncSession, plan_id: str) -> dict:
         service = self.service or _default_service()
         return await service.deactivate_plan(db, plan_id)
 
@@ -143,9 +142,9 @@ class GetPlanTool:
         "additionalProperties": False,
     }
 
-    def __init__(self, service: "NormalizedPlanService | None" = None) -> None:
+    def __init__(self, service: NormalizedPlanService | None = None) -> None:
         self.service = service
 
-    async def execute(self, db: "AsyncSession", plan_id: str) -> dict:
+    async def execute(self, db: AsyncSession, plan_id: str) -> dict:
         service = self.service or _default_service()
         return await service.get_plan_by_id(db, plan_id)

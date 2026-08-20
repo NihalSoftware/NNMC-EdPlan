@@ -7,6 +7,7 @@ import {
 
 const client = axios.create({
 	baseURL: API_BASE_URL,
+	timeout: 15000,
 });
 
 const unwrapData = (response) => response.data?.data || [];

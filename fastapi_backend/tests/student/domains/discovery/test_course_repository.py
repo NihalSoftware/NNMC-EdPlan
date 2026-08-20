@@ -118,9 +118,7 @@ def test_get_course_by_id_returns_program_and_dependencies():
     result = asyncio.run(repository.get_course_by_id(session, str(course.course_id)))
 
     assert result["program"]["program_name"] == "Computer Science"
-    assert result["prerequisites"][0]["prerequisite_course_id"] == str(
-        prerequisite.course_id
-    )
+    assert result["prerequisites"][0]["prerequisite_course_id"] == str(prerequisite.course_id)
     assert result["prerequisites"][0]["course"]["course_code"] == "MATH 101"
     assert result["corequisites"][0]["corequisite_course_id"] == str(corequisite.course_id)
     assert result["corequisites"][0]["course"]["course_code"] == "CS 101L"

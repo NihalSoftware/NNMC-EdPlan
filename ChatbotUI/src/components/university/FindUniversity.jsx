@@ -39,9 +39,8 @@ const FindUniversity = () => {
 				if (cancelled) return;
 				setCollege(result.data?.[0] || null);
 				setMetricError("");
-			} catch (error) {
+			} catch {
 				if (cancelled) return;
-				console.error("Unable to load NNMC College Scorecard data", error);
 				setMetricError(
 					"Official College Scorecard metrics are temporarily unavailable. NNMC links remain available."
 				);

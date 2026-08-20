@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class ScheduleBlock(BaseModel):
@@ -9,6 +9,8 @@ class ScheduleBlock(BaseModel):
 
 
 class ProgramCoursePayload(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     program: str | None = None
     university: str | None = None
     year: str | None = None
@@ -19,9 +21,6 @@ class ProgramCoursePayload(BaseModel):
     prerequisite: str | None = None
     corequisite: str | None = None
     schedule: ScheduleBlock | dict | None = None
-
-    class Config:
-        populate_by_name = True
 
 
 class EducationPlanRequest(BaseModel):

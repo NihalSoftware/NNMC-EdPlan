@@ -7,7 +7,9 @@ import pytest
 from app.orchestrator.execution.module_executor import ModuleExecutor
 from app.orchestrator.modules.module_registry import ModuleRegistry
 from app.orchestrator.schemas.student_context import StudentContext
+from app.student.domains.scheduling import module
 from app.student.domains.scheduling.engine import CandidateGenerator
+from app.student.domains.scheduling.module import SchedulePilotModule
 from app.student.domains.scheduling.schemas.schedulepilot import (
     ScheduleCourse,
     ScheduleCourseOffering,
@@ -17,8 +19,6 @@ from app.student.domains.scheduling.schemas.schedulepilot import (
     ScheduleStudentPlan,
     ScheduleTerm,
 )
-from app.student.domains.scheduling import module
-from app.student.domains.scheduling.module import SchedulePilotModule
 
 
 class _RetrievalService:

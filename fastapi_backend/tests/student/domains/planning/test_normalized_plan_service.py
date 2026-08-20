@@ -48,9 +48,7 @@ class _PlanRepository:
         }
 
     async def list_plans(self, db, *, user_id=None, is_active=None):
-        self.calls.append(
-            {"method": "list_plans", "user_id": user_id, "is_active": is_active}
-        )
+        self.calls.append({"method": "list_plans", "user_id": user_id, "is_active": is_active})
         return [self.plan_payload]
 
     async def create_plan(self, db, **kwargs):
@@ -128,9 +126,7 @@ class _PlanCourseRepository:
         return self.plan_course_model
 
     async def get_plan_course(self, db, *, plan_id, course_id):
-        self.calls.append(
-            {"method": "get_plan_course", "plan_id": plan_id, "course_id": course_id}
-        )
+        self.calls.append({"method": "get_plan_course", "plan_id": plan_id, "course_id": course_id})
         return self.plan_course_payload
 
     async def add_plan_course(self, db, **kwargs):

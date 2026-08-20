@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import asyncio
 import re
+from collections.abc import Mapping
 from typing import Any
 
 import httpx
+from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 
 from app.core.config import settings
 from app.shared.constants.institution import (
@@ -169,8 +171,27 @@ class CollegeScorecardClient:
         self.api_key = settings.college_scorecard_api_key
         self._profile_cache: dict[tuple[str, str, str], dict[str, Any] | None] = {}
 
-    async def _get(self, path: str, params: dict[str, Any]) -> dict[str, Any]:
-        query = {"api_key": self.api_key, "per_page": 25}
+    @retry(
+        retry=retry_if_exception(
+            lambda exc: isinstance(exc, httpx.RequestError)
+            or (
+                isinstance(exc, httpx.HTTPStatusError)
+                and (exc.response.status_code == 429 or exc.response.status_code >= 500)
+            )
+        ),
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=0.5, min=0.5, max=4),
+        reraise=True,
+    )
+    async def _get(
+        self,
+        path: str,
+        params: Mapping[str, str | int | float | bool | None],
+    ) -> dict[str, Any]:
+        query: dict[str, str | int | float | bool | None] = {
+            "api_key": self.api_key,
+            "per_page": 25,
+        }
         query.update(params)
         async with httpx.AsyncClient(timeout=20.0) as client:
             response = await client.get(f"{self.base_url}{path}", params=query)
@@ -185,7 +206,7 @@ class CollegeScorecardClient:
         page: int = 0,
         per_page: int = 25,
     ) -> dict[str, Any]:
-        params: dict[str, Any] = {
+        params: dict[str, str | int | float | bool | None] = {
             "id": NORTHERN_NEW_MEXICO_COLLEGE_SCORECARD_ID,
             "page": 0,
             "per_page": 1,
@@ -199,7 +220,7 @@ class CollegeScorecardClient:
     async def get_school(self, unit_id: str) -> dict[str, Any] | None:
         if str(unit_id) != NORTHERN_NEW_MEXICO_COLLEGE_SCORECARD_ID:
             return None
-        params = {
+        params: dict[str, str | int | float | bool | None] = {
             "id": NORTHERN_NEW_MEXICO_COLLEGE_SCORECARD_ID,
             "fields": ",".join(BASE_FIELDS),
         }
@@ -232,16 +253,11 @@ class CollegeScorecardClient:
 
         state_codes = list(uncached_by_state)
         state_payloads = await asyncio.gather(
-            *(
-                self.search_schools(state=state_code, per_page=100)
-                for state_code in state_codes
-            ),
+            *(self.search_schools(state=state_code, per_page=100) for state_code in state_codes),
             return_exceptions=True,
         )
         candidates_by_state = {
-            state_code: (
-                payload.get("results", []) if isinstance(payload, dict) else []
-            )
+            state_code: (payload.get("results", []) if isinstance(payload, dict) else [])
             for state_code, payload in zip(state_codes, state_payloads, strict=True)
         }
 
@@ -305,8 +321,10 @@ class CollegeScorecardClient:
         self._profile_cache[key] = school
 
     def _map_school(self, record: dict[str, Any]) -> dict[str, Any]:
-        ownership_code = record.get("school.ownership")
-        locale_code = record.get("school.locale")
+        ownership_code = _optional_int(record.get("school.ownership"))
+        locale_code = _optional_int(record.get("school.locale"))
+        predominant_degree_code = _optional_int(record.get("school.degrees_awarded.predominant"))
+        highest_degree_code = _optional_int(record.get("school.degrees_awarded.highest"))
         graduation_rate = record.get("latest.completion.consumer_rate")
         avg_cost = record.get("latest.cost.avg_net_price.overall")
         median_earnings = record.get("latest.earnings.10_yrs_after_entry.median")
@@ -419,18 +437,26 @@ class CollegeScorecardClient:
             "city": school_city,
             "state": school_state,
             "website": school_url,
-            "organization_type": OWNERSHIP_MAP.get(ownership_code, "Other"),
+            "organization_type": (
+                OWNERSHIP_MAP.get(ownership_code, "Other")
+                if ownership_code is not None
+                else "Other"
+            ),
             "size": record.get("latest.student.size"),
-            "location_type": LOCALE_MAP.get(locale_code, "Other"),
+            "location_type": (
+                LOCALE_MAP.get(locale_code, "Other") if locale_code is not None else "Other"
+            ),
             "accreditor": record.get("school.accreditor"),
-            "open_admissions_policy": (
-                open_admissions == 1 if open_admissions in (1, 2) else None
+            "open_admissions_policy": (open_admissions == 1 if open_admissions in (1, 2) else None),
+            "predominant_degree": (
+                PREDOMINANT_DEGREE_MAP.get(predominant_degree_code)
+                if predominant_degree_code is not None
+                else None
             ),
-            "predominant_degree": PREDOMINANT_DEGREE_MAP.get(
-                record.get("school.degrees_awarded.predominant")
-            ),
-            "highest_degree": HIGHEST_DEGREE_MAP.get(
-                record.get("school.degrees_awarded.highest")
+            "highest_degree": (
+                HIGHEST_DEGREE_MAP.get(highest_degree_code)
+                if highest_degree_code is not None
+                else None
             ),
             "main_campus": (
                 bool(record.get("school.main_campus"))
@@ -473,8 +499,14 @@ class CollegeScorecardClient:
                 "pell_grant_rate": record.get("latest.aid.pell_grant_rate"),
             },
             "college_info": {
-                "type": OWNERSHIP_MAP.get(ownership_code, "Other"),
-                "setting": LOCALE_MAP.get(locale_code, "Other"),
+                "type": (
+                    OWNERSHIP_MAP.get(ownership_code, "Other")
+                    if ownership_code is not None
+                    else "Other"
+                ),
+                "setting": (
+                    LOCALE_MAP.get(locale_code, "Other") if locale_code is not None else "Other"
+                ),
                 "website": school_url,
                 "location": ", ".join(filter(None, [school_city, school_state])),
             },
@@ -487,6 +519,10 @@ def _first_non_null(record: dict[str, Any], *keys: str) -> Any:
         if value is not None:
             return value
     return None
+
+
+def _optional_int(value: Any) -> int | None:
+    return value if isinstance(value, int) and not isinstance(value, bool) else None
 
 
 def _state_code(value: str | None) -> str | None:
@@ -514,9 +550,7 @@ def _match_mapped_school(
     profile: dict[str, Any],
     candidates: list[dict[str, Any]],
 ) -> dict[str, Any] | None:
-    desired_name = _normalize_school_name(
-        profile.get("name") or profile.get("university_name")
-    )
+    desired_name = _normalize_school_name(profile.get("name") or profile.get("university_name"))
     desired_city = _normalize_simple(profile.get("city"))
     desired_state = _state_code(profile.get("state"))
     scored: list[tuple[int, int, dict[str, Any]]] = []

@@ -3,17 +3,8 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from inspect import isawaitable
-from typing import TypeVar
+from typing import Any, TypeVar
 from uuid import UUID
-
-try:
-    from langgraph.graph import END as LANGGRAPH_END
-    from langgraph.graph import START as LANGGRAPH_START
-    from langgraph.graph import StateGraph
-except ImportError:  # pragma: no cover - exercised only in minimal local envs.
-    LANGGRAPH_END = "__end__"
-    LANGGRAPH_START = "__start__"
-    StateGraph = None
 
 from app.orchestrator.execution.module_executor import ModuleExecutionResult
 from app.orchestrator.schemas.intent_result import IntentResult
@@ -21,6 +12,19 @@ from app.orchestrator.schemas.module_response import FinalResponse
 from app.orchestrator.schemas.student_context import StudentContext
 from app.orchestrator.schemas.workflow_event import WorkflowEvent
 from app.orchestrator.state.edplan_state import EdPlanState
+
+LangGraphStateGraph: Any
+
+try:
+    from langgraph.graph import END as LANGGRAPH_END
+    from langgraph.graph import START as LANGGRAPH_START
+    from langgraph.graph import StateGraph as _LangGraphStateGraph
+
+    LangGraphStateGraph = _LangGraphStateGraph
+except ImportError:  # pragma: no cover - exercised only in minimal local envs.
+    LANGGRAPH_END = "__end__"
+    LANGGRAPH_START = "__start__"
+    LangGraphStateGraph = None
 
 START = "START"
 CONTEXT_LOADER = "ContextLoader"
@@ -59,10 +63,10 @@ class StudentGraph:
         return state
 
     def _compile(self, nodes: list[StudentGraphNode]):
-        if StateGraph is None:
+        if LangGraphStateGraph is None:
             return _SequentialStudentGraph(nodes)
 
-        graph = StateGraph(EdPlanState)
+        graph = LangGraphStateGraph(EdPlanState)
         for node in nodes:
             graph.add_node(node.name, self._build_langgraph_handler(node))
 
@@ -70,7 +74,7 @@ class StudentGraph:
             graph.add_edge(LANGGRAPH_START, LANGGRAPH_END)
         else:
             graph.add_edge(LANGGRAPH_START, nodes[0].name)
-            for current_node, next_node in zip(nodes, nodes[1:]):
+            for current_node, next_node in zip(nodes, nodes[1:], strict=False):
                 graph.add_edge(current_node.name, next_node.name)
             graph.add_edge(nodes[-1].name, LANGGRAPH_END)
 

@@ -131,9 +131,7 @@ def test_get_university_rejects_invalid_uuid():
 def test_get_university_raises_404_when_missing():
     class _MissingRepository(_Repository):
         async def get_university_by_id(self, db, university_id):
-            self.calls.append(
-                {"method": "get_university_by_id", "university_id": university_id}
-            )
+            self.calls.append({"method": "get_university_by_id", "university_id": university_id})
             return None
 
     repository = _MissingRepository()

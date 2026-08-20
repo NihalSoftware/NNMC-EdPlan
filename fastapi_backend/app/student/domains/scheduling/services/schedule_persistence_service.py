@@ -12,10 +12,10 @@ from app.student.domains.scheduling.schemas.schedule_persistence import (
     ActivationResult,
     DeleteScheduleRequest,
     DeleteScheduleResult,
-    SaveScheduleRequest,
-    SaveScheduleResult,
     SavedScheduleDetail,
     SavedScheduleSectionDetail,
+    SaveScheduleRequest,
+    SaveScheduleResult,
     ScheduleSummary,
 )
 
@@ -72,8 +72,7 @@ class SchedulePersistenceService:
                     for conflict in request.selected_option.conflicts
                 ],
                 warnings_snapshot=[
-                    warning.model_dump(mode="json")
-                    for warning in request.selected_option.warnings
+                    warning.model_dump(mode="json") for warning in request.selected_option.warnings
                 ],
                 tradeoffs_snapshot=list(request.selected_option.tradeoffs),
                 explanation_snapshot={
@@ -176,7 +175,7 @@ class SchedulePersistenceService:
             return DeleteScheduleResult(
                 success=True,
                 deleted_schedule_id=request.schedule_id,
-                removed_section_ids=[],
+                removed_section_ids=removed_section_ids,
             )
         except Exception:
             await db.rollback()
@@ -305,7 +304,9 @@ class SchedulePersistenceService:
             section_ids=section_ids,
         )
         existing_ids = {snapshot["section_id"] for snapshot in section_snapshots}
-        missing_ids = [section_id for section_id in section_ids if str(section_id) not in existing_ids]
+        missing_ids = [
+            section_id for section_id in section_ids if str(section_id) not in existing_ids
+        ]
         if missing_ids:
             raise ValueError(f"Selected sections do not exist: {', '.join(missing_ids)}")
         meetings_by_section: dict[str, list[dict]] = {}

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -12,8 +12,8 @@ from app.orchestrator.context.context_loader import (
     ContextLoader,
     PlanNotFoundError,
     ProgramNotFoundError,
-    UserNotFoundError,
     UniversityNotFoundError,
+    UserNotFoundError,
 )
 from app.student.domains.planning.models import EdPlan
 
@@ -72,8 +72,8 @@ def build_operational_plan() -> EducationPlan:
         university_name="Example University",
         degree="BS",
         payload={"degree": "BS"},
-        created_at=datetime(2026, 1, 1, tzinfo=timezone.utc),
-        updated_at=datetime(2026, 1, 2, tzinfo=timezone.utc),
+        created_at=datetime(2026, 1, 1, tzinfo=UTC),
+        updated_at=datetime(2026, 1, 2, tzinfo=UTC),
     )
     plan.courses = [
         ProgramCourse(
@@ -133,7 +133,7 @@ async def test_load_student_context_successfully():
                         user_id=1,
                         preference_key="career_goal",
                         preference_value="Software Engineer",
-                        updated_at=datetime(2026, 1, 3, tzinfo=timezone.utc),
+                        updated_at=datetime(2026, 1, 3, tzinfo=UTC),
                     )
                 ]
             ),
@@ -145,7 +145,7 @@ async def test_load_student_context_successfully():
                         plan_id=plan_id,
                         run_id=run_id,
                         summary="Student prefers project-based courses.",
-                        created_at=datetime(2026, 1, 4, tzinfo=timezone.utc),
+                        created_at=datetime(2026, 1, 4, tzinfo=UTC),
                     )
                 ]
             ),
@@ -249,7 +249,7 @@ async def test_load_student_context_empty_memory():
                         user_id=1,
                         preference_key="format",
                         preference_value="concise",
-                        updated_at=datetime(2026, 1, 3, tzinfo=timezone.utc),
+                        updated_at=datetime(2026, 1, 3, tzinfo=UTC),
                     )
                 ]
             ),

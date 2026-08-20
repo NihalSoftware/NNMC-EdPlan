@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from app.student.domains.comparison.schemas.comparison import (
     UniversityCompareRequest,
@@ -45,12 +44,12 @@ class SearchUniversitiesTool:
         "additionalProperties": False,
     }
 
-    def __init__(self, service: "ComparisonService | None" = None) -> None:
+    def __init__(self, service: ComparisonService | None = None) -> None:
         self.service = service
 
     async def execute(
         self,
-        db: "AsyncSession",
+        db: AsyncSession,
         payload: UniversitySearchRequest | dict[str, Any],
     ) -> dict:
         request = coerce_payload(UniversitySearchRequest, payload)
@@ -67,7 +66,8 @@ class SearchUniversitiesTool:
 class CompareUniversitiesTool:
     name = "compare_universities"
     description = (
-        "Institution comparison is retained for API compatibility but the NNMC catalog contains only Northern New Mexico College. Input: "
+        "Institution comparison is retained for API compatibility but the NNMC catalog "
+        "contains only Northern New Mexico College. Input: "
         "university_ids. Output compares location, available programs, program count, "
         "public/private when available, website, and catalog information."
     )
@@ -85,12 +85,12 @@ class CompareUniversitiesTool:
         "additionalProperties": False,
     }
 
-    def __init__(self, service: "ComparisonService | None" = None) -> None:
+    def __init__(self, service: ComparisonService | None = None) -> None:
         self.service = service
 
     async def execute(
         self,
-        db: "AsyncSession",
+        db: AsyncSession,
         university_ids: list[str] | UniversityCompareRequest | dict[str, Any],
     ) -> dict:
         if isinstance(university_ids, list):

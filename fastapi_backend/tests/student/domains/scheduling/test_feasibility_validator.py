@@ -175,9 +175,7 @@ def test_detector_flags_malformed_synchronous_meeting_times():
         ]
     )
     invalid = _candidate(
-        meetings=[
-            _meeting("meeting-a", "section-a", start_time=time(10, 0), end_time=time(10, 0))
-        ]
+        meetings=[_meeting("meeting-a", "section-a", start_time=time(10, 0), end_time=time(10, 0))]
     )
 
     assert [conflict.type for conflict in ConflictDetector().detect(missing)] == [

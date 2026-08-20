@@ -74,9 +74,7 @@ class SectionService:
     def __init__(self, repository: SectionRepository = section_repository) -> None:
         self.repository = repository
 
-    async def list_sections_by_offering(
-        self, db: AsyncSession, offering_id: str
-    ) -> list[dict]:
+    async def list_sections_by_offering(self, db: AsyncSession, offering_id: str) -> list[dict]:
         _validate_uuid(offering_id, "offering_id")
         sections = await self.repository.list_sections_by_offering(db, offering_id)
         if sections is None:
@@ -98,14 +96,10 @@ class SectionService:
 
 
 class SectionMeetingService:
-    def __init__(
-        self, repository: SectionMeetingRepository = section_meeting_repository
-    ) -> None:
+    def __init__(self, repository: SectionMeetingRepository = section_meeting_repository) -> None:
         self.repository = repository
 
-    async def list_meetings_by_section(
-        self, db: AsyncSession, section_id: str
-    ) -> list[dict]:
+    async def list_meetings_by_section(self, db: AsyncSession, section_id: str) -> list[dict]:
         _validate_uuid(section_id, "section_id")
         meetings = await self.repository.list_meetings_by_section(db, section_id)
         if meetings is None:

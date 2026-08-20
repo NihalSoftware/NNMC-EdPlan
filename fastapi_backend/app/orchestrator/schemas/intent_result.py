@@ -10,4 +10,3 @@ class IntentResult(BaseModel):
     confidence: float = Field(..., ge=0.0, le=1.0)
     target_modules: list[str] = Field(default_factory=list)
     reasoning: str | None = None
-

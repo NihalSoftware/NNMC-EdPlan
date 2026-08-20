@@ -21,7 +21,9 @@ class PreferenceScorer:
     def __init__(self, weights: ScoringWeights | None = None) -> None:
         self.weights = weights or DEFAULT_SCORING_WEIGHTS
 
-    def score(self, candidate: ScheduleCandidate, preferences: list[dict[str, Any]]) -> ScheduleCandidate:
+    def score(
+        self, candidate: ScheduleCandidate, preferences: list[dict[str, Any]]
+    ) -> ScheduleCandidate:
         started_at = perf_counter()
         normalized_preferences = normalize_preferences(preferences)
         evaluations: list[PreferenceEvaluation] = []
@@ -57,7 +59,9 @@ class PreferenceScorer:
                     scoring_time_ms=scoring_time_ms,
                     evaluated_preferences=len(evaluations),
                     applied_bonus_count=len([item for item in evaluations if item.score_delta > 0]),
-                    applied_penalty_count=len([item for item in evaluations if item.score_delta < 0]),
+                    applied_penalty_count=len(
+                        [item for item in evaluations if item.score_delta < 0]
+                    ),
                     bonus_total=bonus_total,
                     penalty_total=penalty_total,
                     satisfied_preferences=[
@@ -116,14 +120,19 @@ class PreferenceScorer:
                 rationale=f"Schedule uses {metrics.campus_days} campus days.",
             )
         if key == "online_only":
-            satisfied = metrics.total_sections > 0 and metrics.online_section_count == metrics.total_sections
+            satisfied = (
+                metrics.total_sections > 0
+                and metrics.online_section_count == metrics.total_sections
+            )
             return self._binary(key, satisfied, "Requires all sections to be online.")
         if key == "online_preferred":
             return self._mode_preference(key, metrics.online_section_count, metrics.total_sections)
         if key == "hybrid_preferred":
             return self._mode_preference(key, metrics.hybrid_section_count, metrics.total_sections)
         if key == "in_person_preferred":
-            return self._mode_preference(key, metrics.in_person_section_count, metrics.total_sections)
+            return self._mode_preference(
+                key, metrics.in_person_section_count, metrics.total_sections
+            )
         if key == "minimize_gaps":
             if metrics.total_gap_minutes <= self.weights.compact_gap_threshold_minutes:
                 return self._binary(key, True, "Schedule has limited gaps.")

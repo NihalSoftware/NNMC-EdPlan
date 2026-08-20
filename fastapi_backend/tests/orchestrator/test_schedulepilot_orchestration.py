@@ -6,6 +6,7 @@ from uuid import uuid4
 import pytest
 
 from app.models.agentic import ModuleExecution, OrchestratorRun, WorkflowEvent
+from app.orchestrator.modules.module_registry import ModuleRegistry
 from app.orchestrator.observability.run_tracker import COMPLETED
 from app.orchestrator.observability.workflow_tracker import (
     MODULE_EXECUTION_COMPLETED,
@@ -14,7 +15,6 @@ from app.orchestrator.observability.workflow_tracker import (
 from app.orchestrator.router.module_selector import SCHEDULING
 from app.orchestrator.schemas.student_context import StudentContext
 from app.orchestrator.services.student_orchestrator import StudentOrchestrator
-from app.orchestrator.modules.module_registry import ModuleRegistry
 from app.student.domains.scheduling.module import SchedulePilotModule
 from app.student.domains.scheduling.schemas.schedulepilot import (
     ScheduleCourse,

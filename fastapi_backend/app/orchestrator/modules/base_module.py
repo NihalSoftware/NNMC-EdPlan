@@ -14,4 +14,3 @@ class BaseModule(ABC):
     @abstractmethod
     async def execute(self, context: StudentContext, query: str) -> ModuleResponse:
         """Execute the module for a student context and natural-language query."""
-

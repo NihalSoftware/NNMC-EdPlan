@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Final
 from uuid import UUID, uuid4
 
@@ -206,7 +206,8 @@ class MemoryManager:
     def _extract_schedule_preference(text: str) -> str | None:
         lowered = text.lower()
         no_day_match = re.search(
-            r"\bi\s+(?:do not|don't)\s+want\s+classes\s+on\s+(?P<day>monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b",
+            r"\bi\s+(?:do not|don't)\s+want\s+classes\s+on\s+"
+            r"(?P<day>monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b",
             lowered,
         )
         if no_day_match is not None:
@@ -246,4 +247,4 @@ def _compact_sentence(value: str) -> str:
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)

@@ -20,7 +20,5 @@ async def create_reschedule(
 
 
 async def get_reschedules(db: AsyncSession, *, user_id: int) -> Sequence[CourseReschedule]:
-    result = await db.execute(
-        select(CourseReschedule).where(CourseReschedule.user_id == user_id)
-    )
+    result = await db.execute(select(CourseReschedule).where(CourseReschedule.user_id == user_id))
     return result.scalars().all()

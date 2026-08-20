@@ -104,7 +104,8 @@ class CandidateGenerator:
                 sections = sorted(sections, key=lambda item: (item.section_number, item.section_id))
                 if not sections:
                     warnings.append(
-                        f"No sections found for course {course.course_id} component {component_key}."
+                        "No sections found for course "
+                        f"{course.course_id} component {component_key}."
                     )
                     return []
                 component_section_groups.append(sections)

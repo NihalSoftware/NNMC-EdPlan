@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from app.student.domains.comparison.schemas.comparison import (
     CareerPathCompareRequest,
@@ -46,12 +45,12 @@ class SearchProgramsTool:
         "additionalProperties": False,
     }
 
-    def __init__(self, service: "ComparisonService | None" = None) -> None:
+    def __init__(self, service: ComparisonService | None = None) -> None:
         self.service = service
 
     async def execute(
         self,
-        db: "AsyncSession",
+        db: AsyncSession,
         payload: ProgramSearchRequest | dict[str, Any],
     ) -> dict:
         request = coerce_payload(ProgramSearchRequest, payload)
@@ -86,12 +85,12 @@ class CompareProgramsTool:
         "additionalProperties": False,
     }
 
-    def __init__(self, service: "ComparisonService | None" = None) -> None:
+    def __init__(self, service: ComparisonService | None = None) -> None:
         self.service = service
 
     async def execute(
         self,
-        db: "AsyncSession",
+        db: AsyncSession,
         program_ids: list[str] | ProgramCompareRequest | dict[str, Any],
     ) -> dict:
         request = _coerce_program_ids(ProgramCompareRequest, program_ids)
@@ -108,12 +107,12 @@ class CompareCareerPathsTool:
     )
     parameters = CompareProgramsTool.parameters
 
-    def __init__(self, service: "ComparisonService | None" = None) -> None:
+    def __init__(self, service: ComparisonService | None = None) -> None:
         self.service = service
 
     async def execute(
         self,
-        db: "AsyncSession",
+        db: AsyncSession,
         program_ids: list[str] | CareerPathCompareRequest | dict[str, Any],
     ) -> dict:
         request = _coerce_program_ids(CareerPathCompareRequest, program_ids)

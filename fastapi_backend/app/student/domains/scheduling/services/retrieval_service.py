@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -79,7 +80,7 @@ class SchedulePilotRetrievalService:
         self,
         db: AsyncSession,
         *,
-        course_ids: list[str | UUID],
+        course_ids: Sequence[str | UUID],
     ) -> list[ScheduleCourseOffering]:
         offerings = await self.repository.get_offerings_for_courses(db, course_ids=course_ids)
         return [_offering_to_contract(offering) for offering in offerings]
@@ -88,7 +89,7 @@ class SchedulePilotRetrievalService:
         self,
         db: AsyncSession,
         *,
-        offering_ids: list[str | UUID],
+        offering_ids: Sequence[str | UUID],
     ) -> list[ScheduleSection]:
         sections = await self.repository.get_sections_for_offerings(db, offering_ids=offering_ids)
         return [_section_to_contract(section) for section in sections]
@@ -97,7 +98,7 @@ class SchedulePilotRetrievalService:
         self,
         db: AsyncSession,
         *,
-        section_ids: list[str | UUID],
+        section_ids: Sequence[str | UUID],
     ) -> list[ScheduleMeeting]:
         meetings = await self.repository.get_meetings_for_sections(db, section_ids=section_ids)
         return [_meeting_to_contract(meeting) for meeting in meetings]
@@ -272,7 +273,9 @@ def _warnings(
             if offering.offering_id not in section_offering_ids
         ],
         sections_without_meetings=[
-            section.section_id for section in sections if section.section_id not in meeting_section_ids
+            section.section_id
+            for section in sections
+            if section.section_id not in meeting_section_ids
         ],
     )
 

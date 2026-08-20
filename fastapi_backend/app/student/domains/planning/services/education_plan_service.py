@@ -1,24 +1,25 @@
 from __future__ import annotations
 
-from typing import Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.education_plan import CourseReschedule, EducationPlan
 from app.models.user import User
-from app.student.domains.auth.services import user_service
+from app.shared.constants.institution import (
+    NORTHERN_NEW_MEXICO_COLLEGE_NAME,
+    is_northern_new_mexico_college,
+)
 from app.student.domains.planning.repositories import plan_repository, reschedule_repository
 from app.student.domains.planning.schemas.education import (
+    EducationPlanDeleteRequest,
     EducationPlanListQuery,
     EducationPlanQuery,
     EducationPlanRequest,
     ProgramCoursePayload,
     RescheduleRequest,
-)
-from app.shared.constants.institution import (
-    NORTHERN_NEW_MEXICO_COLLEGE_NAME,
-    is_northern_new_mexico_college,
 )
 
 
@@ -53,44 +54,42 @@ def _plan_payload(plan: EducationPlan) -> dict:
 
 
 async def add_or_replace_plan_for_request(
-    db: AsyncSession, payload: EducationPlanRequest
+    db: AsyncSession, user: User, payload: EducationPlanRequest
 ) -> dict:
-    user = await user_service.get_user_by_email(db, payload.emailaddress)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+    _require_matching_email(user, payload.emailaddress)
     plan = await add_or_replace_plan(db, user, payload)
     return plan.payload
 
 
-async def query_plan_payload(db: AsyncSession, query: EducationPlanQuery) -> dict | None:
-    plan = await query_plan(db, query)
+async def query_plan_payload(
+    db: AsyncSession, user: User, query: EducationPlanQuery
+) -> dict | None:
+    _require_matching_email(user, query.email)
+    plan = await query_plan(db, user.id, query)
     if not plan:
         return None
     return _plan_payload(plan)
 
 
 async def list_plan_payloads(
-    db: AsyncSession, query: EducationPlanListQuery
+    db: AsyncSession, user: User, query: EducationPlanListQuery
 ) -> list[dict]:
-    plans = await list_plans(db, query)
+    _require_matching_email(user, query.email)
+    plans = await list_plans(db, user)
     return [_plan_payload(plan) for plan in plans]
 
 
 async def delete_plan_for_request(
-    db: AsyncSession, request: EducationPlanDeleteRequest
+    db: AsyncSession, user: User, request: EducationPlanDeleteRequest
 ) -> None:
-    user = await user_service.get_user_by_email(db, request.email.lower())
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+    _require_matching_email(user, request.email)
     await delete_plan(db, user, request.programname, request.univerityname, request.degree)
 
 
 async def save_reschedule_for_request(
-    db: AsyncSession, request: RescheduleRequest
+    db: AsyncSession, user: User, request: RescheduleRequest
 ) -> dict:
-    user = await user_service.get_user_by_email(db, request.emailaddress)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+    _require_matching_email(user, request.emailaddress)
     entry = await save_reschedule(db, user, request)
     return entry.payload
 
@@ -104,18 +103,16 @@ async def add_or_replace_plan(
     program_name, university_name = _infer_program(payload.program)
     degree_value = payload.degree.strip() if payload.degree else None
 
-    existing = await get_plan_by_program(
-        db, user.id, program_name, university_name, degree_value
-    )
-    plan_payload = {"program": [course.model_dump(by_alias=True) for course in payload.program]}
+    existing = await get_plan_by_program(db, user.id, program_name, university_name, degree_value)
+    plan_payload: dict[str, Any] = {
+        "program": [course.model_dump(by_alias=True) for course in payload.program]
+    }
     if degree_value:
         plan_payload["degree"] = degree_value
 
     if existing:
         await plan_repository.update_plan(existing, payload=plan_payload, degree=degree_value)
-        await plan_repository.delete_program_courses(
-            db, education_plan_id=existing.id
-        )
+        await plan_repository.delete_program_courses(db, education_plan_id=existing.id)
         await _persist_courses(db, existing, payload.program)
         await db.commit()
         await db.refresh(existing)
@@ -168,9 +165,12 @@ async def get_plan_by_program(
     return None
 
 
-async def query_plan(db: AsyncSession, query: EducationPlanQuery) -> EducationPlan | None:
+async def query_plan(
+    db: AsyncSession, user_id: int, query: EducationPlanQuery
+) -> EducationPlan | None:
     plans = await plan_repository.get_plan(
         db,
+        user_id=user_id,
         program_name=query.programname,
         university_name=query.univerityname,
     )
@@ -186,8 +186,16 @@ async def query_plan(db: AsyncSession, query: EducationPlanQuery) -> EducationPl
     return None
 
 
-async def list_plans(db: AsyncSession, query: EducationPlanListQuery) -> Sequence[EducationPlan]:
-    return await plan_repository.list_plans(db, email=query.email.lower())
+async def list_plans(db: AsyncSession, user: User) -> Sequence[EducationPlan]:
+    return await plan_repository.list_plans(db, user_id=user.id)
+
+
+def _require_matching_email(user: User, request_email: str) -> None:
+    if user.email.lower() != str(request_email).strip().lower():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="The request email does not match the authenticated user.",
+        )
 
 
 async def delete_plan(

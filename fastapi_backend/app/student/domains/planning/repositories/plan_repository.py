@@ -4,8 +4,8 @@ from sqlalchemy import and_, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.education_plan import EducationPlan, ProgramCourse
-from app.student.domains.planning.schemas.education import ProgramCoursePayload
 from app.shared.constants.institution import NORTHERN_NEW_MEXICO_COLLEGE_NAME
+from app.student.domains.planning.schemas.education import ProgramCoursePayload
 
 
 async def get_plan(
@@ -25,10 +25,10 @@ async def get_plan(
     return result.scalars().all()
 
 
-async def list_plans(db: AsyncSession, *, email: str) -> Sequence[EducationPlan]:
+async def list_plans(db: AsyncSession, *, user_id: int) -> Sequence[EducationPlan]:
     result = await db.execute(
         select(EducationPlan).where(
-            EducationPlan.user.has(email=email),
+            EducationPlan.user_id == user_id,
             EducationPlan.university_name.ilike(NORTHERN_NEW_MEXICO_COLLEGE_NAME),
         )
     )
@@ -92,7 +92,7 @@ async def persist_courses(
                 corequisite=entry.corequisite,
                 schedule=(
                     entry.schedule.model_dump()
-                    if hasattr(entry.schedule, "model_dump")
+                    if entry.schedule is not None and hasattr(entry.schedule, "model_dump")
                     else entry.schedule
                 ),
             )
@@ -100,4 +100,6 @@ async def persist_courses(
 
 
 async def delete_program_courses(db: AsyncSession, *, education_plan_id: int) -> None:
-    await db.execute(delete(ProgramCourse).where(ProgramCourse.education_plan_id == education_plan_id))
+    await db.execute(
+        delete(ProgramCourse).where(ProgramCourse.education_plan_id == education_plan_id)
+    )

@@ -14,9 +14,7 @@ class _Repository:
         self.dependencies = [{"course": {"course_code": "MATH 101"}}]
 
     async def list_courses(self, db, *, program_id=None, search=None):
-        self.calls.append(
-            {"method": "list_courses", "program_id": program_id, "search": search}
-        )
+        self.calls.append({"method": "list_courses", "program_id": program_id, "search": search})
         return [self.course]
 
     async def get_course_by_id(self, db, course_id):

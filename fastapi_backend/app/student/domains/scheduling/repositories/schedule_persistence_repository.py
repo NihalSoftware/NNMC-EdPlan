@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import uuid
+from collections.abc import Sequence
 
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.student.domains.planning.models import EdPlan
-from app.student.domains.discovery.models import University
 from app.shared.constants.institution import NORTHERN_NEW_MEXICO_COLLEGE_NAME
+from app.student.domains.discovery.models import University
+from app.student.domains.planning.models import EdPlan
 from app.student.domains.scheduling.models import (
     CourseOffering,
     PlanSchedule,
@@ -32,9 +33,7 @@ class SchedulePersistenceRepository:
             select(EdPlan).where(
                 EdPlan.plan_id == parsed_plan_id,
                 EdPlan.university.has(
-                    University.university_name.ilike(
-                        NORTHERN_NEW_MEXICO_COLLEGE_NAME
-                    )
+                    University.university_name.ilike(NORTHERN_NEW_MEXICO_COLLEGE_NAME)
                 ),
             )
         )
@@ -44,21 +43,19 @@ class SchedulePersistenceRepository:
         self,
         db: AsyncSession,
         *,
-        section_ids: list[str | uuid.UUID],
+        section_ids: Sequence[str | uuid.UUID],
     ) -> list[Section]:
         parsed_section_ids = _parse_uuid_list(section_ids)
         if not parsed_section_ids:
             return []
-        result = await db.execute(
-            select(Section).where(Section.section_id.in_(parsed_section_ids))
-        )
+        result = await db.execute(select(Section).where(Section.section_id.in_(parsed_section_ids)))
         return list(result.scalars().all())
 
     async def get_section_snapshots_by_ids(
         self,
         db: AsyncSession,
         *,
-        section_ids: list[str | uuid.UUID],
+        section_ids: Sequence[str | uuid.UUID],
     ) -> list[dict]:
         parsed_section_ids = _parse_uuid_list(section_ids)
         if not parsed_section_ids:
@@ -180,8 +177,7 @@ class SchedulePersistenceRepository:
             select(SchedulePilotSchedule, SchedulePilotScheduleSection)
             .outerjoin(
                 SchedulePilotScheduleSection,
-                SchedulePilotSchedule.schedule_id
-                == SchedulePilotScheduleSection.schedule_id,
+                SchedulePilotSchedule.schedule_id == SchedulePilotScheduleSection.schedule_id,
             )
             .where(SchedulePilotSchedule.schedule_id == parsed_schedule_id)
             .order_by(
@@ -535,7 +531,7 @@ def _require_uuid(value: str | uuid.UUID, field_name: str) -> uuid.UUID:
     return parsed
 
 
-def _parse_uuid_list(values: list[str | uuid.UUID]) -> list[uuid.UUID]:
+def _parse_uuid_list(values: Sequence[str | uuid.UUID]) -> list[uuid.UUID]:
     parsed_values = [_parse_uuid(value) for value in values]
     return [value for value in parsed_values if value is not None]
 

@@ -47,4 +47,3 @@ def test_intent_router_general_question_has_low_confidence():
     assert result.intent == "general_question"
     assert result.confidence == 0.35
     assert result.target_modules == []
-

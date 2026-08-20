@@ -3,17 +3,14 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import toast, { Toaster, ToastBar } from "react-hot-toast";
 import App from "./App.jsx";
+import AppErrorBoundary from "./components/common/AppErrorBoundary.jsx";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <BrowserRouter
-    future={{
-      v7_relativeSplatPath: true,
-      v7_startTransition: true,
-    }}
-  >
-    <App />
-    <Toaster
+  <AppErrorBoundary>
+    <BrowserRouter>
+      <App />
+      <Toaster
       position="bottom-left"
       toastOptions={{
         duration: 3500,
@@ -66,6 +63,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           )}
         </ToastBar>
       )}
-    </Toaster>
-  </BrowserRouter>
+      </Toaster>
+    </BrowserRouter>
+  </AppErrorBoundary>
 );

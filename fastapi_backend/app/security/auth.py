@@ -1,12 +1,13 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
+import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+from jwt.exceptions import InvalidTokenError
 from passlib.context import CryptContext
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.db.session import get_db
@@ -33,8 +34,15 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_access_token(subject: str, expires_minutes: int | None = None) -> str:
     expire_delta = expires_minutes or settings.access_token_expire_minutes
-    expire = datetime.utcnow() + timedelta(minutes=expire_delta)
-    payload = {"sub": subject, "exp": expire}
+    now = datetime.now(UTC)
+    expire = now + timedelta(minutes=expire_delta)
+    payload = {
+        "sub": subject,
+        "exp": expire,
+        "iat": now,
+        "iss": settings.jwt_issuer,
+        "aud": settings.jwt_audience,
+    }
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
@@ -42,9 +50,15 @@ async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)], db: Annotated[AsyncSession, Depends(get_db)]
 ) -> User:
     try:
-        payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+        payload = jwt.decode(
+            token,
+            settings.jwt_secret,
+            algorithms=[settings.jwt_algorithm],
+            issuer=settings.jwt_issuer,
+            audience=settings.jwt_audience,
+        )
         email: str | None = payload.get("sub")
-    except JWTError as exc:
+    except InvalidTokenError as exc:
         raise AuthError("Invalid authentication credentials") from exc
 
     if not email:

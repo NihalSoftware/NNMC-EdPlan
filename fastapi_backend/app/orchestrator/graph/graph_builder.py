@@ -7,10 +7,10 @@ from app.orchestrator.execution.module_executor import ModuleExecutionResult
 from app.orchestrator.graph.student_graph import (
     CONTEXT_LOADER,
     INTENT_ROUTER,
-    MODULE_SELECTOR,
-    MODULE_EXECUTOR,
-    RESPONSE_COMPOSER,
     MEMORY_MANAGER,
+    MODULE_EXECUTOR,
+    MODULE_SELECTOR,
+    RESPONSE_COMPOSER,
     StudentGraph,
     StudentGraphNode,
     build_context_loader_node,
@@ -31,9 +31,10 @@ from app.orchestrator.schemas.module_response import FinalResponse
 from app.orchestrator.schemas.student_context import StudentContext
 from app.orchestrator.state.edplan_state import EdPlanState
 
-
 ContextLoaderCallable = Callable[[int, UUID, str], Awaitable[StudentContext]]
-IntentRouterCallable = Callable[[str, StudentContext | None], IntentResult | Awaitable[IntentResult]]
+IntentRouterCallable = Callable[
+    [str, StudentContext | None], IntentResult | Awaitable[IntentResult]
+]
 ModuleSelectorCallable = Callable[[IntentResult], object | Awaitable[object]]
 ModuleExecutorCallable = Callable[
     [list[str], StudentContext, str], Awaitable[dict[str, ModuleExecutionResult]]

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import uuid
 from datetime import date, time
-from typing import List
 
 from sqlalchemy import (
     Boolean,
@@ -42,7 +41,7 @@ class AcademicTerm(Base):
     end_date: Mapped[date] = mapped_column(Date, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"))
 
-    offerings: Mapped[List["CourseOffering"]] = relationship(back_populates="term")
+    offerings: Mapped[list[CourseOffering]] = relationship(back_populates="term")
 
 
 class CourseOffering(Base):
@@ -81,7 +80,7 @@ class CourseOffering(Base):
 
     course: Mapped[Course] = relationship()
     term: Mapped[AcademicTerm] = relationship(back_populates="offerings")
-    sections: Mapped[List["Section"]] = relationship(back_populates="offering")
+    sections: Mapped[list[Section]] = relationship(back_populates="offering")
 
 
 class Section(Base):
@@ -125,7 +124,7 @@ class Section(Base):
     status: Mapped[str] = mapped_column(String(20), nullable=False, server_default=text("'Open'"))
 
     offering: Mapped[CourseOffering] = relationship(back_populates="sections")
-    meetings: Mapped[List["SectionMeeting"]] = relationship(back_populates="section")
+    meetings: Mapped[list[SectionMeeting]] = relationship(back_populates="section")
 
 
 class SectionMeeting(Base):

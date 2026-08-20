@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from app.student.domains.planning.schemas.planning_validation import PlanValidationRequest
 from app.student.domains.planning.tools._payloads import coerce_payload
@@ -46,13 +45,13 @@ class ValidatePlanTool:
 
     def __init__(
         self,
-        service: "PlanningValidationService | None" = None,
+        service: PlanningValidationService | None = None,
     ) -> None:
         self.service = service
 
     async def execute(
         self,
-        db: "AsyncSession",
+        db: AsyncSession,
         plan_id: str,
         payload: PlanValidationRequest | dict[str, Any] | None = None,
     ) -> dict:

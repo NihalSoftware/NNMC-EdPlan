@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import uuid
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from app.student.domains.discovery.models import Course, Program, University
 from app.shared.constants.institution import NORTHERN_NEW_MEXICO_COLLEGE_NAME
+from app.student.domains.discovery.models import Course, Program, University
 from app.student.domains.scheduling.models import (
     AcademicTerm,
     CourseOffering,
@@ -76,15 +77,11 @@ class SectionRepository:
         )
         return [_section_to_dict(section) for section in result.scalars().all()]
 
-    async def get_section_by_id(
-        self, db: AsyncSession, section_id: str | uuid.UUID
-    ) -> dict | None:
+    async def get_section_by_id(self, db: AsyncSession, section_id: str | uuid.UUID) -> dict | None:
         parsed_section_id = _parse_uuid(section_id)
         if parsed_section_id is None:
             return None
-        result = await db.execute(
-            _section_query().where(Section.section_id == parsed_section_id)
-        )
+        result = await db.execute(_section_query().where(Section.section_id == parsed_section_id))
         section = result.scalar_one_or_none()
         return _section_to_dict(section, include_offering=True) if section else None
 
@@ -134,9 +131,7 @@ def _offering_query():
             CourseOffering.course.has(
                 Course.program.has(
                     Program.university.has(
-                        University.university_name.ilike(
-                            NORTHERN_NEW_MEXICO_COLLEGE_NAME
-                        )
+                        University.university_name.ilike(NORTHERN_NEW_MEXICO_COLLEGE_NAME)
                     )
                 )
             )
@@ -156,9 +151,7 @@ def _section_query():
                 CourseOffering.course.has(
                     Course.program.has(
                         Program.university.has(
-                            University.university_name.ilike(
-                                NORTHERN_NEW_MEXICO_COLLEGE_NAME
-                            )
+                            University.university_name.ilike(NORTHERN_NEW_MEXICO_COLLEGE_NAME)
                         )
                     )
                 )
@@ -216,7 +209,7 @@ def _offering_to_dict(offering: CourseOffering) -> dict:
 
 
 def _section_to_dict(section: Section, *, include_offering: bool = False) -> dict:
-    payload = {
+    payload: dict[str, Any] = {
         "section_id": str(section.section_id),
         "offering_id": str(section.offering_id),
         "section_number": section.section_number,

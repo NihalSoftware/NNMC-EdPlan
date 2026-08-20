@@ -75,8 +75,8 @@ class _Repository:
         source="system_generated",
         score=None,
         normalized_score=None,
-            rank_at_generation=None,
-            selected_term_id=None,
+        rank_at_generation=None,
+        selected_term_id=None,
         metrics_snapshot=None,
         conflicts_snapshot=None,
         warnings_snapshot=None,
@@ -150,8 +150,7 @@ class _Repository:
     async def list_schedules_with_sections(self, db, *, plan_id):
         schedules = [self.schedule] if self.schedule is not None else []
         return schedules, {
-            schedule.schedule_id: list(self.replaced_sections)
-            for schedule in schedules
+            schedule.schedule_id: list(self.replaced_sections) for schedule in schedules
         }
 
     async def get_schedule_with_sections(self, db, *, schedule_id):
@@ -453,7 +452,9 @@ def test_service_rejects_missing_schedule():
 
     with pytest.raises(ValueError, match="Schedule not found"):
         asyncio.run(
-            SchedulePersistenceService(repository=_Repository(plan=_plan(plan_id))).activate_schedule(
+            SchedulePersistenceService(
+                repository=_Repository(plan=_plan(plan_id))
+            ).activate_schedule(
                 session,
                 request,
             )
@@ -482,7 +483,7 @@ def test_service_deletes_schedule_and_current_plan_sections():
 
     assert result.success is True
     assert result.deleted_schedule_id == str(schedule.schedule_id)
-    assert result.removed_section_ids == []
+    assert result.removed_section_ids == [str(section_id)]
     assert repository.deleted_selected_sections is False
     assert repository.deleted_schedule is None
     assert schedule.status == "Archived"
@@ -523,9 +524,7 @@ def test_service_lists_and_loads_schedule_with_schedule_owned_sections():
     service = SchedulePersistenceService(repository=repository)
     session = _Session()
 
-    schedules = asyncio.run(
-        service.list_plan_schedules(session, user_id=1, plan_id=str(plan_id))
-    )
+    schedules = asyncio.run(service.list_plan_schedules(session, user_id=1, plan_id=str(plan_id)))
     assert repository.list_schedule_sections_calls == 0
     loaded = asyncio.run(
         service.get_schedule(

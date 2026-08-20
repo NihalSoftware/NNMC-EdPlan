@@ -25,7 +25,9 @@ class CandidateValidationService:
         feasible_count = len([candidate for candidate in candidates if candidate.is_feasible])
         infeasible_count = len(candidates) - feasible_count
         warning_count = sum(candidate.validation_summary.warning_count for candidate in candidates)
-        conflict_count = sum(candidate.validation_summary.conflict_count for candidate in candidates)
+        conflict_count = sum(
+            candidate.validation_summary.conflict_count for candidate in candidates
+        )
         return candidates, {
             "validated_count": len(candidates),
             "feasible_count": feasible_count,

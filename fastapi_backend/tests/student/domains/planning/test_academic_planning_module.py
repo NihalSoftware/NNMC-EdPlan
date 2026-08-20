@@ -28,7 +28,6 @@ from app.student.domains.planning.tools import (
 )
 from app.student.domains.planning.tools.registry import PLANNING_TOOLS
 
-
 EXPECTED_TOOL_NAMES = [
     "create_plan",
     "update_plan",
@@ -240,12 +239,11 @@ def test_read_only_planning_tools_delegate_to_existing_read_services():
     assert asyncio.run(GetCorequisitesTool(course_service).execute(db, "course-1")) == [
         {"course_id": "co-1"}
     ]
-    assert asyncio.run(
-        GetProgramRequirementsTool(program_service).execute(db, "program-1")
-    ) == {"program_id": "program-1", "courses": []}
-    assert asyncio.run(GetAvailableTermsTool(term_service).execute(db)) == [
-        {"term_id": "term-1"}
-    ]
+    assert asyncio.run(GetProgramRequirementsTool(program_service).execute(db, "program-1")) == {
+        "program_id": "program-1",
+        "courses": [],
+    }
+    assert asyncio.run(GetAvailableTermsTool(term_service).execute(db)) == [{"term_id": "term-1"}]
 
 
 def _plan_create_payload():

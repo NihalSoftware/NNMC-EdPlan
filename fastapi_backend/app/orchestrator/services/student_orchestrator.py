@@ -5,6 +5,7 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.agentic import OrchestratorRun
 from app.orchestrator.composer.response_composer import ResponseComposer
 from app.orchestrator.context.context_loader import ContextLoader
 from app.orchestrator.execution.module_executor import ModuleExecutor
@@ -21,9 +22,9 @@ from app.orchestrator.observability.workflow_tracker import (
     MEMORY_UPDATE_COMPLETED,
     MEMORY_UPDATE_FAILED,
     MEMORY_UPDATE_STARTED,
-    MODULES_SELECTED,
     MODULE_EXECUTION_COMPLETED,
     MODULE_EXECUTION_STARTED,
+    MODULES_SELECTED,
     RESPONSE_COMPOSED,
     WorkflowTracker,
 )
@@ -33,11 +34,15 @@ from app.orchestrator.schemas.module_response import FinalResponse
 from app.orchestrator.schemas.student_context import StudentContext
 from app.orchestrator.state.edplan_state import EdPlanState
 from app.student.domains.planning.module import (
-    AcademicPlanningModule,
     MODULE_NAME as ACADEMIC_PLANNING_MODULE_NAME,
+)
+from app.student.domains.planning.module import (
+    AcademicPlanningModule,
 )
 from app.student.domains.scheduling.module import (
     MODULE_NAME as SCHEDULEPILOT_MODULE_NAME,
+)
+from app.student.domains.scheduling.module import (
     SchedulePilotModule,
 )
 
@@ -62,9 +67,7 @@ class StudentOrchestrator:
     ) -> None:
         self.module_registry = module_registry or ModuleRegistry()
         if db is not None and not self.module_registry.exists(ACADEMIC_PLANNING_MODULE_NAME):
-            self.module_registry.register(
-                AcademicPlanningModule(db=db, llm_provider=llm_provider)
-            )
+            self.module_registry.register(AcademicPlanningModule(db=db, llm_provider=llm_provider))
         if db is not None and not self.module_registry.exists(SCHEDULEPILOT_MODULE_NAME):
             self.module_registry.register(SchedulePilotModule(db=db))
         self.context_loader = context_loader or (ContextLoader(db) if db is not None else None)
@@ -125,7 +128,7 @@ class StudentOrchestrator:
 
     def _build_observable_graph(
         self,
-        run: object,
+        run: OrchestratorRun | None,
         stage_tracker: dict[str, str],
     ) -> StudentGraph:
         run_id = getattr(run, "run_id", None)

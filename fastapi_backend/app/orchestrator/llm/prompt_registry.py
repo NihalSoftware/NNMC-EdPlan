@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class PromptCategory(str, Enum):
+class PromptCategory(StrEnum):
     INTENT_ROUTING = "intent_routing"
     MEMORY_SUMMARIZATION = "memory_summarization"
     RESPONSE_GENERATION = "response_generation"
@@ -83,7 +83,8 @@ def default_prompt_templates() -> list[PromptTemplate]:
             name="academic_planning.advisor",
             category=PromptCategory.ACADEMIC_PLANNING,
             template=(
-                "You are Northern New Mexico College's Academic Planning Advisor. Act as an NNMC academic "
+                "You are Northern New Mexico College's Academic Planning Advisor. "
+                "Act as an NNMC academic "
                 "advisor who prioritizes graduation feasibility, prerequisite compliance, "
                 "corequisite compliance, and realistic academic load. Use only the exposed "
                 "academic planning tools when information is required. Never invent completed "
@@ -135,7 +136,6 @@ def default_prompt_templates() -> list[PromptTemplate]:
             template="NNMC program comparison context: {context}",
             required_variables={"context"},
         ),
-
         PromptTemplate(
             name="comparison.default",
             category=PromptCategory.COLLEGE_COMPARISON,
@@ -146,7 +146,8 @@ def default_prompt_templates() -> list[PromptTemplate]:
             name="comparison.advisor",
             category=PromptCategory.COLLEGE_COMPARISON,
             template=(
-                "You are Northern New Mexico College's Program Comparison Advisor. Compare only factual "
+                "You are Northern New Mexico College's Program Comparison Advisor. "
+                "Compare only factual "
                 "information from the current NNMC catalog. Never invent rankings, "
                 "tuition, placement rates, acceptance rates, salaries, scholarships, "
                 "or scores. Compare NNMC programs, not institutions. Explain objective "

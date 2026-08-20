@@ -9,10 +9,10 @@ from sqlalchemy.orm import joinedload, selectinload
 
 # Initialize Base metadata before importing model packages from a cold route import.
 from app.db.base import Base as _Base  # noqa: F401
+from app.shared.constants.institution import NORTHERN_NEW_MEXICO_COLLEGE_NAME
 from app.student.domains.discovery.models import Course, Program, University
 from app.student.domains.planning.models import EdPlan, PlanCourse
 from app.student.domains.scheduling.models import AcademicTerm
-from app.shared.constants.institution import NORTHERN_NEW_MEXICO_COLLEGE_NAME
 
 
 class NormalizedPlanRepository:
@@ -66,9 +66,7 @@ class NormalizedPlanRepository:
                 Program.program_id == program_id,
                 Program.university_id == university_id,
                 Program.university.has(
-                    University.university_name.ilike(
-                        NORTHERN_NEW_MEXICO_COLLEGE_NAME
-                    )
+                    University.university_name.ilike(NORTHERN_NEW_MEXICO_COLLEGE_NAME)
                 ),
             )
         )
@@ -226,9 +224,7 @@ def _plan_course_query():
     return (
         select(PlanCourse)
         .options(
-            joinedload(PlanCourse.course)
-            .joinedload(Course.program)
-            .joinedload(Program.university),
+            joinedload(PlanCourse.course).joinedload(Course.program).joinedload(Program.university),
             joinedload(PlanCourse.planned_term),
         )
         .outerjoin(PlanCourse.planned_term)
@@ -236,9 +232,7 @@ def _plan_course_query():
         .where(
             PlanCourse.plan.has(
                 EdPlan.university.has(
-                    University.university_name.ilike(
-                        NORTHERN_NEW_MEXICO_COLLEGE_NAME
-                    )
+                    University.university_name.ilike(NORTHERN_NEW_MEXICO_COLLEGE_NAME)
                 )
             )
         )

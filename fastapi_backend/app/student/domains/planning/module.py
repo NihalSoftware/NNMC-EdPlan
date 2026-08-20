@@ -23,7 +23,8 @@ MODULE_NAME = "academic_planning"
 MODULE_DESCRIPTION = "Manage student education plans and graduation pathways."
 
 ACADEMIC_PLANNING_ADVISOR_PROMPT = (
-    "You are Northern New Mexico College's Academic Planning Advisor. Act as an NNMC academic advisor. "
+    "You are Northern New Mexico College's Academic Planning Advisor. "
+    "Act as an NNMC academic advisor. "
     "Prioritize graduation feasibility, prerequisite compliance, corequisite compliance, "
     "and realistic academic load. Use only the exposed academic planning tools when "
     "information is required. Never invent completed courses, degree requirements, "
@@ -372,7 +373,9 @@ class AcademicPlanningModule(BaseModule):
             return await tool.execute(self.db, self._plan_id(context, command))
         if tool_name == "add_course":
             plan_id = self._plan_id(context, command)
-            return await tool.execute(self.db, plan_id, self._course_create_payload(command, payload))
+            return await tool.execute(
+                self.db, plan_id, self._course_create_payload(command, payload)
+            )
         if tool_name == "remove_course":
             return await tool.execute(
                 self.db,
@@ -451,9 +454,7 @@ class AcademicPlanningModule(BaseModule):
     ) -> str:
         program = context.program or {}
         program_id = (
-            command.get("program_id")
-            or payload.get("program_id")
-            or program.get("program_id")
+            command.get("program_id") or payload.get("program_id") or program.get("program_id")
         )
         if not program_id:
             raise ValueError("program_id is required for this planning tool.")
@@ -513,8 +514,7 @@ class AcademicPlanningModule(BaseModule):
         return {
             key: value
             for key, value in {
-                "planned_term_id": payload.get("planned_term_id")
-                or command.get("planned_term_id"),
+                "planned_term_id": payload.get("planned_term_id") or command.get("planned_term_id"),
                 "status": payload.get("status") or command.get("status"),
                 "notes": payload.get("notes") or command.get("notes"),
             }.items()

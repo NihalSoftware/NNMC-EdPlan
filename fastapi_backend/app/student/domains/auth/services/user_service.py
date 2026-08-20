@@ -28,14 +28,13 @@ async def register_user(db: AsyncSession, payload: RegisterRequest) -> User:
     if existing:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already exists")
 
-    role_value = payload.role.value if hasattr(payload.role, "value") else payload.role
     user = await user_repository.create_user(
         db,
         email=payload.email.lower(),
         first_name=payload.first_name,
         last_name=payload.last_name,
         phone_number=payload.phone_number,
-        role=role_value or UserRole.CUSTOMER.value,
+        role=UserRole.CUSTOMER.value,
         password_hash=hash_password(payload.password),
     )
     try:
@@ -58,7 +57,11 @@ async def register_user(db: AsyncSession, payload: RegisterRequest) -> User:
 async def authenticate_user(db: AsyncSession, email: str, password: str) -> User:
     user = await get_user_by_email(db, email.lower())
     if not user or not verify_password(password, user.password_hash):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid credentials")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
     await user_repository.update_last_login(db, user, func.now())
     try:

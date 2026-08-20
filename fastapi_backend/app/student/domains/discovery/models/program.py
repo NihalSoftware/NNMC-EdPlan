@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import uuid
-from typing import List
 
 from sqlalchemy import (
     CheckConstraint,
@@ -42,7 +41,7 @@ class University(Base):
     website: Mapped[str | None] = mapped_column(String(255))
     college_profile: Mapped[dict | None] = mapped_column(JSONB)
 
-    programs: Mapped[List["Program"]] = relationship(back_populates="university")
+    programs: Mapped[list[Program]] = relationship(back_populates="university")
 
 
 class Program(Base):
@@ -75,7 +74,7 @@ class Program(Base):
     metadata_json: Mapped[dict | None] = mapped_column(JSONB)
 
     university: Mapped[University] = relationship(back_populates="programs")
-    courses: Mapped[List["Course"]] = relationship(back_populates="program")
+    courses: Mapped[list[Course]] = relationship(back_populates="program")
 
 
 class Course(Base):
@@ -143,21 +142,21 @@ class Course(Base):
         )
 
     program: Mapped[Program] = relationship(back_populates="courses")
-    prerequisite_links: Mapped[List["CoursePrerequisite"]] = relationship(
+    prerequisite_links: Mapped[list[CoursePrerequisite]] = relationship(
         back_populates="course",
         foreign_keys="CoursePrerequisite.course_id",
         cascade="all, delete-orphan",
     )
-    required_by_links: Mapped[List["CoursePrerequisite"]] = relationship(
+    required_by_links: Mapped[list[CoursePrerequisite]] = relationship(
         back_populates="prerequisite_course",
         foreign_keys="CoursePrerequisite.prerequisite_course_id",
     )
-    corequisite_links: Mapped[List["CourseCorequisite"]] = relationship(
+    corequisite_links: Mapped[list[CourseCorequisite]] = relationship(
         back_populates="course",
         foreign_keys="CourseCorequisite.course_id",
         cascade="all, delete-orphan",
     )
-    corequired_by_links: Mapped[List["CourseCorequisite"]] = relationship(
+    corequired_by_links: Mapped[list[CourseCorequisite]] = relationship(
         back_populates="corequisite_course",
         foreign_keys="CourseCorequisite.corequisite_course_id",
     )

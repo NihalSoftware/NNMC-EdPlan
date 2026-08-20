@@ -112,11 +112,7 @@ class ConflictDetector:
     ) -> list[ScheduleConflict]:
         conflicts: list[ScheduleConflict] = []
         meetings = sorted(
-            [
-                meeting
-                for meeting in candidate.meetings
-                if _has_valid_sync_time(meeting)
-            ],
+            [meeting for meeting in candidate.meetings if _has_valid_sync_time(meeting)],
             key=lambda item: (
                 item.weekday,
                 item.start_time,
@@ -169,6 +165,13 @@ def _has_valid_sync_time(meeting: ScheduleMeeting) -> bool:
 
 
 def _overlap(left: ScheduleMeeting, right: ScheduleMeeting) -> tuple[time, time] | None:
+    if (
+        left.start_time is None
+        or left.end_time is None
+        or right.start_time is None
+        or right.end_time is None
+    ):
+        return None
     overlap_start = max(left.start_time, right.start_time)
     overlap_end = min(left.end_time, right.end_time)
     if overlap_start < overlap_end:

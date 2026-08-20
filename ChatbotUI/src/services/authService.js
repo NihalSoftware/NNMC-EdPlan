@@ -1,16 +1,17 @@
 import axios from "axios";
-import { load } from "../utils/storage.js";
+import { loadSession } from "../utils/storage.js";
 import { API_BASE_URL } from "./apiBaseUrl.js";
 
 const client = axios.create({
 	baseURL: API_BASE_URL,
+	timeout: 15000,
 	headers: {
 		"Content-Type": "application/json",
 	},
 });
 
 client.interceptors.request.use((config) => {
-	const token = load("AuthToken");
+	const token = loadSession("AuthToken");
 	if (token) {
 		config.headers = config.headers ?? {};
 		if (!config.headers.Authorization) {

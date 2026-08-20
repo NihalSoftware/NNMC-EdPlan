@@ -6,6 +6,10 @@ import uuid
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.shared.constants.institution import (
+    NORTHERN_NEW_MEXICO_COLLEGE_NAME,
+    NORTHERN_NEW_MEXICO_COLLEGE_SCORECARD_ID,
+)
 from app.student.domains.discovery.clients.college_scorecard import (
     CollegeScorecardClient,
 )
@@ -15,10 +19,6 @@ from app.student.domains.discovery.clients.college_scorecard import (
 from app.student.domains.discovery.repositories.university_repository import (
     UniversityRepository,
     university_repository,
-)
-from app.shared.constants.institution import (
-    NORTHERN_NEW_MEXICO_COLLEGE_NAME,
-    NORTHERN_NEW_MEXICO_COLLEGE_SCORECARD_ID,
 )
 
 
@@ -103,9 +103,7 @@ class UniversityService:
             )
         return await self._enrich_with_scorecard(university)
 
-    async def compare_universities(
-        self, db: AsyncSession, university_ids: list[str]
-    ) -> list[dict]:
+    async def compare_universities(self, db: AsyncSession, university_ids: list[str]) -> list[dict]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=(
@@ -138,15 +136,11 @@ class UniversityService:
             scorecards = [scorecard for _ in universities]
         except Exception:
             return list(
-                await asyncio.gather(
-                    *(self._enrich_with_scorecard(item) for item in universities)
-                )
+                await asyncio.gather(*(self._enrich_with_scorecard(item) for item in universities))
             )
 
         return [
-            _merge_university_data(university, scorecard)
-            if scorecard
-            else university
+            _merge_university_data(university, scorecard) if scorecard else university
             for university, scorecard in zip(universities, scorecards, strict=True)
         ]
 

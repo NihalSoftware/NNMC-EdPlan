@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from traceback import format_exception
 from typing import Any
 from uuid import UUID, uuid4
@@ -140,7 +140,7 @@ class RunTracker:
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def _duration_ms(started_at: datetime, completed_at: datetime) -> int:

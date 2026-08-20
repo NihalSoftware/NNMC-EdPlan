@@ -32,7 +32,7 @@ async def compare_schools(
 ) -> list[dict]:
     results = []
     for unit_id in unit_ids:
-        school = await scorecard_client.get_school(unit_id)
+        school = await scorecard_client.get_school(str(unit_id))
         if school:
             results.append(school)
     return results

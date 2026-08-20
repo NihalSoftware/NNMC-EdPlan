@@ -47,4 +47,3 @@ class ModuleRegistry:
             raise TypeError("Module must define an execute method.")
         if not iscoroutinefunction(module.execute):
             raise TypeError("Module execute method must be async.")
-

@@ -5,8 +5,8 @@ from uuid import uuid4
 import pytest
 
 from app.models.agentic import ModuleExecution, OrchestratorRun, WorkflowEvent
-from app.orchestrator.modules.base_module import BaseModule
 from app.orchestrator.memory.memory_manager import MemoryManager
+from app.orchestrator.modules.base_module import BaseModule
 from app.orchestrator.modules.module_registry import ModuleRegistry
 from app.orchestrator.observability.run_tracker import COMPLETED, FAILED, RUNNING, RunTracker
 from app.orchestrator.observability.workflow_tracker import (
@@ -16,9 +16,9 @@ from app.orchestrator.observability.workflow_tracker import (
     MEMORY_UPDATE_COMPLETED,
     MEMORY_UPDATE_FAILED,
     MEMORY_UPDATE_STARTED,
-    MODULES_SELECTED,
     MODULE_EXECUTION_COMPLETED,
     MODULE_EXECUTION_STARTED,
+    MODULES_SELECTED,
     RESPONSE_COMPOSED,
 )
 from app.orchestrator.router.module_selector import ACADEMIC_PLANNING

@@ -6,8 +6,8 @@ from app.orchestrator.schemas.student_context import StudentContext
 from app.student.domains.scheduling.engine import (
     CandidateGenerator,
     CandidateValidationService,
-    ScheduleMetricsService,
     PreferenceScoringService,
+    ScheduleMetricsService,
     ScheduleRankingService,
 )
 from app.student.domains.scheduling.services.retrieval_service import (
@@ -99,9 +99,7 @@ class SchedulePilotModule(BaseModule):
         )
         ranking_result = self.ranking_service.rank_candidates(scored_candidates)
         data = retrieval_context.model_dump(mode="json")
-        data["candidates"] = [
-            candidate.model_dump(mode="json") for candidate in scored_candidates
-        ]
+        data["candidates"] = [candidate.model_dump(mode="json") for candidate in scored_candidates]
         data["validated_candidates"] = data["candidates"]
         data["scored_candidates"] = data["candidates"]
         data["ranked_options"] = [

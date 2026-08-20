@@ -20,7 +20,9 @@ from app.student.domains.scheduling.services.retrieval_service import (
 
 
 class _Repository:
-    def __init__(self, *, plan=None, courses=None, terms=None, offerings=None, sections=None, meetings=None):
+    def __init__(
+        self, *, plan=None, courses=None, terms=None, offerings=None, sections=None, meetings=None
+    ):
         self.plan = plan
         self.courses = courses if courses is not None else []
         self.terms = terms if terms is not None else []

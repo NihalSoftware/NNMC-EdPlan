@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from collections.abc import Sequence
 from typing import Any
 
 from sqlalchemy import bindparam, select, text
@@ -40,10 +41,11 @@ class ComparisonRepository:
     async def get_universities_by_ids(
         self,
         db: AsyncSession,
-        university_ids: list[str | uuid.UUID],
+        university_ids: Sequence[str | uuid.UUID],
     ) -> list[dict]:
-        parsed_ids = [_parse_uuid(value) for value in university_ids]
-        parsed_ids = [value for value in parsed_ids if value is not None]
+        parsed_ids = [
+            parsed for value in university_ids if (parsed := _parse_uuid(value)) is not None
+        ]
         if not parsed_ids:
             return []
 
@@ -85,10 +87,9 @@ class ComparisonRepository:
     async def get_programs_by_ids(
         self,
         db: AsyncSession,
-        program_ids: list[str | uuid.UUID],
+        program_ids: Sequence[str | uuid.UUID],
     ) -> list[dict]:
-        parsed_ids = [_parse_uuid(value) for value in program_ids]
-        parsed_ids = [value for value in parsed_ids if value is not None]
+        parsed_ids = [parsed for value in program_ids if (parsed := _parse_uuid(value)) is not None]
         if not parsed_ids:
             return []
 
@@ -104,10 +105,9 @@ class ComparisonRepository:
     async def get_careers_for_programs(
         self,
         db: AsyncSession,
-        program_ids: list[str | uuid.UUID],
+        program_ids: Sequence[str | uuid.UUID],
     ) -> dict[str, list[dict]]:
-        parsed_ids = [_parse_uuid(value) for value in program_ids]
-        parsed_ids = [value for value in parsed_ids if value is not None]
+        parsed_ids = [parsed for value in program_ids if (parsed := _parse_uuid(value)) is not None]
         if not parsed_ids:
             return {}
 
@@ -220,7 +220,7 @@ def _university_to_dict(university: University, *, include_programs: bool = Fals
         for program in university.programs or []
         if (program.metadata_json or {}).get("is_current_catalog") is not False
     ]
-    payload = {
+    payload: dict[str, Any] = {
         "university_id": str(university.university_id),
         "university_name": university.university_name,
         "name": university.university_name,

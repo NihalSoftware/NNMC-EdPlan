@@ -327,8 +327,7 @@ const EducationPlanEditor = () => {
 		saveStorage("universityview", INSTITUTION.name);
 		listPrograms()
 			.then((items) => setPrograms(items))
-			.catch((err) => {
-				console.error(err);
+			.catch(() => {
 				setError("Unable to load program catalog.");
 			});
 		// Load program from storage on mount (keep university even if program is missing)
@@ -447,8 +446,7 @@ const EducationPlanEditor = () => {
 			let hydratedMatch = null;
 			try {
 				hydratedMatch = await getProgramWithCourses(match.program_id);
-			} catch (err) {
-				console.error("Unable to load selected program courses", err);
+			} catch {
 				if (!cancelled) {
 					setProgramLoadError(
 						"Unable to load the default plan. Check the NNMC catalog connection and try again."
@@ -1220,7 +1218,6 @@ const EducationPlanEditor = () => {
 			saveStorage("EditingPlanActive", false);
 			navigate("/view");
 		} catch (err) {
-			console.error(err);
 			if (err.response?.status === 401) {
 				toast.error("Your session has expired. Please login again.");
 			} else {

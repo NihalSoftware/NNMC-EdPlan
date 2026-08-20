@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import List
+from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, JSON, String, func
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.models.user import User
 
 
 class EducationPlan(Base):
@@ -23,8 +26,8 @@ class EducationPlan(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    user: Mapped["User"] = relationship(back_populates="education_plans")
-    courses: Mapped[List["ProgramCourse"]] = relationship(
+    user: Mapped[User] = relationship(back_populates="education_plans")
+    courses: Mapped[list[ProgramCourse]] = relationship(
         back_populates="education_plan", cascade="all, delete-orphan"
     )
 
@@ -66,10 +69,12 @@ class CourseReschedule(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    requested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    requested_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
     payload: Mapped[dict] = mapped_column(JSON)
 
-    user: Mapped["User"] = relationship(back_populates="reschedules")
+    user: Mapped[User] = relationship(back_populates="reschedules")
 
 
 class Country(Base):
@@ -77,7 +82,7 @@ class Country(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(128), unique=True)
-    states: Mapped[List["State"]] = relationship(back_populates="country", cascade="all")
+    states: Mapped[list[State]] = relationship(back_populates="country", cascade="all")
 
 
 class State(Base):

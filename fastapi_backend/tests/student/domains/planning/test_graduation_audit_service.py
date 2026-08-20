@@ -180,9 +180,7 @@ def test_graduation_audit_route_is_registered():
     from app.student.domains.planning.api.graduation_audit import router
 
     routes = [
-        route
-        for route in router.routes
-        if isinstance(route, APIRoute) and "GET" in route.methods
+        route for route in router.routes if isinstance(route, APIRoute) and "GET" in route.methods
     ]
 
     assert any(route.path == "/plans/{plan_id}/audit" for route in routes)

@@ -138,6 +138,7 @@ class FeasibilityValidator:
 
 
 def _duration_minutes(meeting: ScheduleMeeting) -> int:
+    assert meeting.start_time is not None and meeting.end_time is not None
     start_minutes = meeting.start_time.hour * 60 + meeting.start_time.minute
     end_minutes = meeting.end_time.hour * 60 + meeting.end_time.minute
     return end_minutes - start_minutes

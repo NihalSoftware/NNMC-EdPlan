@@ -1,6 +1,6 @@
 from app.student.domains.planning.schemas.graduation_audit import (  # noqa: F401
-    GraduationAuditCourseSummary,
     GraduationAuditCourses,
+    GraduationAuditCourseSummary,
     GraduationAuditCredits,
     GraduationAuditProgram,
     GraduationAuditResult,

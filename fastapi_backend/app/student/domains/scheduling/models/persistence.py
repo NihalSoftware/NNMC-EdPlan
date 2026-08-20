@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Any, List
+from typing import Any
 
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
     DateTime,
-    ForeignKey,
     Float,
+    ForeignKey,
     Index,
     Integer,
     String,
@@ -243,12 +243,12 @@ class SchedulePilotSchedule(Base):
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     plan = relationship("EdPlan")
-    parent_schedule: Mapped["SchedulePilotSchedule | None"] = relationship(
+    parent_schedule: Mapped[SchedulePilotSchedule | None] = relationship(
         "SchedulePilotSchedule",
         remote_side=[schedule_id],
     )
     selected_term = relationship("AcademicTerm")
-    sections: Mapped[List["SchedulePilotScheduleSection"]] = relationship(
+    sections: Mapped[list[SchedulePilotScheduleSection]] = relationship(
         back_populates="schedule",
         cascade="all, delete-orphan",
     )
