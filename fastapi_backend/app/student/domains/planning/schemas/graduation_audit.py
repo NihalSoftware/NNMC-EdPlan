@@ -11,9 +11,9 @@ class GraduationAuditProgram(BaseModel):
 
 
 class GraduationAuditCredits(BaseModel):
-    planned: int
-    required: int
-    remaining: int
+    planned: float
+    required: float
+    remaining: float
     completion_percentage: float
 
 

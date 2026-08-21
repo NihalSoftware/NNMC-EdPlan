@@ -91,11 +91,17 @@ def _program_to_dict(program: Program, *, include_courses: bool = False) -> dict
         "program_name": program.program_name,
         "degree": program.degree,
         "total_credit_hours": program.total_credit_hours,
+        "total_credit_hours_text": metadata.get("catalog_total_credits_text"),
+        "total_credit_hours_min": metadata.get("catalog_total_credits_min"),
+        "total_credit_hours_max": metadata.get("catalog_total_credits_max"),
         "catalog_title": metadata.get("catalog_title"),
         "catalog_url": metadata.get("catalog_url"),
         "catalog_year": metadata.get("catalog_year"),
         "description": "\n\n".join(intro) if intro else None,
         "metadata_json": metadata,
+        "official_source_id": program.official_source_id,
+        "official_source_url": program.official_source_url,
+        "source_retrieved_at": program.source_retrieved_at,
         "university": {
             "university_id": str(university.university_id),
             "university_name": university.university_name,
@@ -142,6 +148,8 @@ def _course_summary_to_dict(course: Course) -> dict:
         "description": course.description,
         "prerequisite": metadata.get("prerequisite"),
         "corequisite": metadata.get("corequisite"),
+        "pre_or_corequisite": metadata.get("pre_or_corequisite"),
+        "requirement_expressions": metadata.get("requirement_expressions") or {},
         "catalog_url": metadata.get("catalog_url"),
         "credit_text": metadata.get("catalog_credit_text"),
         "credits_min": metadata.get("credits_min"),
@@ -149,6 +157,9 @@ def _course_summary_to_dict(course: Course) -> dict:
         "requirement_occurrences": metadata.get("requirement_occurrences") or [],
         "metadata_json": metadata,
         "source_sequence": course.source_sequence,
+        "official_source_id": course.official_source_id,
+        "official_source_url": course.official_source_url,
+        "source_retrieved_at": course.source_retrieved_at,
     }
 
 

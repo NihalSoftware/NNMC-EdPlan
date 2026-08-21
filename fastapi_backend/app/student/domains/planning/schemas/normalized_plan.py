@@ -43,7 +43,7 @@ class PlanCourseUpdateRequest(BaseModel):
 class TermCreditTotal(BaseModel):
     planned_term_id: str | None = None
     term_name: str | None = None
-    credits: int
+    credits: float
 
 
 class PlanCourseSummary(BaseModel):

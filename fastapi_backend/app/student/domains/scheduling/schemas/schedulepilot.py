@@ -51,9 +51,9 @@ class ScheduleCourse(BaseModel):
     notes: str | None = None
     course_code: str
     course_name: str
-    credits: int
-    lecture_hours: int
-    lab_hours: int
+    credits: float
+    lecture_hours: float
+    lab_hours: float
     recommended_year: int | None = None
     recommended_semester: str | None = None
     planned_term: ScheduleTerm | None = None
@@ -66,7 +66,7 @@ class ScheduleCourseOffering(BaseModel):
     offering_type: str
     course_code: str
     course_name: str
-    credits: int
+    credits: float
     term: ScheduleTerm
 
 

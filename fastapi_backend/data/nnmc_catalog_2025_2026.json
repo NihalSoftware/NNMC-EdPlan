@@ -1,6 +1,7 @@
 {
   "source": "https://catalog.nnmc.edu/content.php?catoid=3&navoid=110",
   "catalogYear": "2025-2026",
+  "retrievedAt": "2026-08-21T07:58:04.237Z",
   "programs": [
     {
       "category": "Bachelor of Arts",
@@ -36217,8 +36218,8 @@
     },
     {
       "coid": "2768",
-      "code": "MATH 3400",
-      "name": "3405 - Undergraduate Research Experience in Mathematics",
+      "code": "MATH 3400-3405",
+      "name": "Undergraduate Research Experience in Mathematics",
       "catalogTitle": "MATH 3400-3405 - Undergraduate Research Experience in Mathematics",
       "creditContactText": "(1-6 CR, 1-6T + 0L)",
       "creditsMax": 6,
@@ -44045,6 +44046,392 @@
       "labHours": 2,
       "lectureHours": 1,
       "sourceUrl": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=2764"
+    },
+    {
+      "catalogTitle": "ARTS 2426 - Photography II",
+      "code": "ARTS 2426",
+      "name": "Photography II",
+      "creditContactText": "(3 CR, 1T + 2S)",
+      "creditsMin": 3,
+      "creditsMax": 3,
+      "lectureHours": null,
+      "labHours": null,
+      "fields": {
+        "description": "This course is a continuation of Photography I in which students will study advanced black and white techniques covering exposure, development, various films, and the use of filters, with special emphasis on tonal control through the creative use of the zone system; increased emphasis on personal vision, aspects of design, composition, and perception.",
+        "prerequisites": "ARTS 1410."
+      },
+      "fieldLinks": {
+        "prerequisites": [
+          {
+            "coid": "1714",
+            "text": "ARTS 1410",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1714"
+          }
+        ]
+      },
+      "sourceUrl": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1723",
+      "coid": "1723"
+    },
+    {
+      "catalogTitle": "BIOL 4406L - Stream Ecology and Field Methods Lab",
+      "code": "BIOL 4406L",
+      "name": "Stream Ecology and Field Methods Lab",
+      "creditContactText": "(1 CR, 0T + 1L)",
+      "creditsMin": 1,
+      "creditsMax": 1,
+      "lectureHours": 0,
+      "labHours": 1,
+      "fields": {
+        "description": "You will engage in laboratory experiences supportive of BIOL 4406."
+      },
+      "fieldLinks": {},
+      "sourceUrl": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1803",
+      "coid": "1803"
+    },
+    {
+      "catalogTitle": "CHEM 3311 - Physical Chemistry",
+      "code": "CHEM 3311",
+      "name": "Physical Chemistry",
+      "creditContactText": "(3 CR, 3T + 0L)",
+      "creditsMin": 3,
+      "creditsMax": 3,
+      "lectureHours": 3,
+      "labHours": 0,
+      "fields": {
+        "description": "You will study the quantitative principles of chemistry, gases, thermodynamics, quantum systems, equilibrium, kinetics, and spectroscopy.",
+        "prerequisites": "MATH 1520, PHYS 1240, CHEM 1225 / CHEM 1225L, 2310 / 2310L.",
+        "corequisites": "CHEM 3311L."
+      },
+      "fieldLinks": {
+        "prerequisites": [
+          {
+            "coid": "2148",
+            "text": "MATH 1520",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=2148"
+          },
+          {
+            "coid": "2252",
+            "text": "PHYS 1240",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=2252"
+          },
+          {
+            "coid": "1840",
+            "text": "CHEM 1225",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1840"
+          },
+          {
+            "coid": "1850",
+            "text": "CHEM 1225L",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1850"
+          },
+          {
+            "coid": "1842",
+            "text": "2310",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1842"
+          },
+          {
+            "coid": "1852",
+            "text": "2310L",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1852"
+          }
+        ],
+        "corequisites": [
+          {
+            "coid": "1855",
+            "text": "CHEM 3311L",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1855"
+          }
+        ]
+      },
+      "sourceUrl": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1845",
+      "coid": "1845"
+    },
+    {
+      "catalogTitle": "CHEM 3311L - Physical Chemistry Lab",
+      "code": "CHEM 3311L",
+      "name": "Physical Chemistry Lab",
+      "creditContactText": "(1 CR, 0T + 1L)",
+      "creditsMin": 1,
+      "creditsMax": 1,
+      "lectureHours": 0,
+      "labHours": 1,
+      "fields": {
+        "description": "You will engage in laboratory experiences supportive of CHEM 3311.",
+        "corequisites": "CHEM 3311."
+      },
+      "fieldLinks": {
+        "corequisites": [
+          {
+            "coid": "1845",
+            "text": "CHEM 3311",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1845"
+          }
+        ]
+      },
+      "sourceUrl": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1855",
+      "coid": "1855"
+    },
+    {
+      "catalogTitle": "ENGL 109N - Accelerated Basic Composition II",
+      "code": "ENGL 109N",
+      "name": "Accelerated Basic Composition II",
+      "creditContactText": "(3 CR, 3T + 0L)",
+      "creditsMin": 3,
+      "creditsMax": 3,
+      "lectureHours": 3,
+      "labHours": 0,
+      "fields": {
+        "description": "This course prepares students for college-level composition by engaging them in the writing process and focusing on the rhetorical skills necessary to write focused, clearly organized, well-supported, and grammatically correct essays. Students will critically read texts and incorporate ideas from sources to develop and support an arguable thesis. This will be accomplished by practicing the research skills of summarizing, paraphrasing, and quoting, using MLA format. This accelerated course has a Co-requisite of ENGL 1110 and is designed to support student’s successful completion of the objectives of ENGL 1110.",
+        "prerequisites": "Adequate score on Course Placement Evaluation.",
+        "corequisites": "ENGL 1110 and FYEX 1110."
+      },
+      "fieldLinks": {
+        "corequisites": [
+          {
+            "coid": "1968",
+            "text": "ENGL 1110",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1968"
+          },
+          {
+            "coid": "2075",
+            "text": "FYEX 1110",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=2075"
+          }
+        ]
+      },
+      "sourceUrl": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1988",
+      "coid": "1988"
+    },
+    {
+      "catalogTitle": "ENVS 2201 - Environmental Physical and Chemical Processes",
+      "code": "ENVS 2201",
+      "name": "Environmental Physical and Chemical Processes",
+      "creditContactText": "(3 CR, 3T + 0L)",
+      "creditsMin": 3,
+      "creditsMax": 3,
+      "lectureHours": 3,
+      "labHours": 0,
+      "fields": {
+        "description": "You will study basic general, analytical, organic, and polymer chemistry from an environmental perspective: the pollutants of air, water, and land; the rudiments of toxicology, and an introduction to green chemistry. You will learn about chemical processes in industry and nature, physical transport, risk, and aspects of human impacts and policy.",
+        "prerequisites": "BIOL 2110 / BIOL 2110L and CHEM 1215 / CHEM 1215L.",
+        "corequisites": "ENVS 2201L."
+      },
+      "fieldLinks": {
+        "prerequisites": [
+          {
+            "coid": "1751",
+            "text": "BIOL 2110",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1751"
+          },
+          {
+            "coid": "1796",
+            "text": "BIOL 2110L",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1796"
+          },
+          {
+            "coid": "1839",
+            "text": "CHEM 1215",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1839"
+          },
+          {
+            "coid": "1849",
+            "text": "CHEM 1215L",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1849"
+          }
+        ],
+        "corequisites": [
+          {
+            "coid": "2049",
+            "text": "ENVS 2201L",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=2049"
+          }
+        ]
+      },
+      "sourceUrl": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=2011",
+      "coid": "2011"
+    },
+    {
+      "catalogTitle": "ENVS 2201L - Environmental Physical and Chemical Processes Lab",
+      "code": "ENVS 2201L",
+      "name": "Environmental Physical and Chemical Processes Lab",
+      "creditContactText": "(1 CR, 0T + 1L)",
+      "creditsMin": 1,
+      "creditsMax": 1,
+      "lectureHours": 0,
+      "labHours": 1,
+      "fields": {
+        "description": "You will study the basic techniques for chemical analysis of environmental samples including air, water, and soil. You will also learn to use electronic data acquisition systems and further develop your scientific writing skills.",
+        "corequisites": "ENVS 2201."
+      },
+      "fieldLinks": {
+        "corequisites": [
+          {
+            "coid": "2011",
+            "text": "ENVS 2201",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=2011"
+          }
+        ]
+      },
+      "sourceUrl": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=2049",
+      "coid": "2049"
+    },
+    {
+      "catalogTitle": "MATH 100N - Fundamentals of Mathematics",
+      "code": "MATH 100N",
+      "name": "Fundamentals of Mathematics",
+      "creditContactText": "(4 CR, 4T + 0L)",
+      "creditsMin": 4,
+      "creditsMax": 4,
+      "lectureHours": 4,
+      "labHours": 0,
+      "fields": {
+        "description": "Introduction to the mathematical method and its use in practical applications. Students will use fundamental operations with fractions, decimals and signed values; convert between fractions, decimals and percentages; apply the order of operations correctly; create algebraic expressions and equations; simplify algebraic expressions and equations; manipulate formulas; translate verbal statements into algebraic expressions and equations; solve linear equations; create tables and graphs; interpret graphs; and describe the results of problem solving orally and in writing. Grades are awarded on a CR / NC basis.",
+        "prerequisites": "Adequate score on the Course Placement Exam."
+      },
+      "fieldLinks": {},
+      "sourceUrl": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=2171",
+      "coid": "2171"
+    },
+    {
+      "catalogTitle": "PSYC 1130 - Introduction to Substance Abuse Studies",
+      "code": "PSYC 1130",
+      "name": "Introduction to Substance Abuse Studies",
+      "creditContactText": "(3 CR, 3T + 0L)",
+      "creditsMin": 3,
+      "creditsMax": 3,
+      "lectureHours": 3,
+      "labHours": 0,
+      "fields": {
+        "description": "This survey course offers an overview of the biological, psychological, and sociological aspects of drug and alcohol abuse and addiction and an overview of substance abuse problems in the family, school, and industry. Consideration will be given to current research, attitudes towards drugs, theories of drug addiction and treatment, and Licensed Alcohol and Drug Abuse Counselor requirements in the state of New Mexico."
+      },
+      "fieldLinks": {},
+      "sourceUrl": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=2295",
+      "coid": "2295"
+    },
+    {
+      "catalogTitle": "SPAN 1110 - Spanish I",
+      "code": "SPAN 1110",
+      "name": "Spanish I",
+      "creditContactText": "(3 CR, 3T + 0L)",
+      "creditsMin": 3,
+      "creditsMax": 3,
+      "lectureHours": 3,
+      "labHours": 0,
+      "fields": {
+        "description": "Designed for students with little exposure to Spanish, this course develops basic listening, speaking, reading, and writing skills and basic intercultural competence in interpretive, interpersonal and presentational modes of communication at the Novice Level of proficiency based on ACTFL guidelines. During this course, students perform better and stronger in the Novice-Mid level while some abilities emerge in the Novice High range. This is an introductory course aimed at helping the student to communicate in Spanish in everyday familiar situations via recognition and production of practiced or memorized words, phrases, and simple sentences."
+      },
+      "fieldLinks": {},
+      "sourceUrl": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=2351",
+      "coid": "2351"
+    },
+    {
+      "catalogTitle": "SPAN 1120 - Spanish II",
+      "code": "SPAN 1120",
+      "name": "Spanish II",
+      "creditContactText": "(4 CR, 4T + 0L)",
+      "creditsMin": 4,
+      "creditsMax": 4,
+      "lectureHours": 4,
+      "labHours": 0,
+      "fields": {
+        "description": "Designed for students with some degree of exposure to Spanish in high school and / or at home, this course continues to develop basic listening, speaking, reading, and writing skills and basic intercultural competence in interpretive, interpersonal and presentational modes of communication based at the Novice High Level of proficiency based on ACTFL guidelines, although a few abilities may emerge in the Intermediate Low Level. Students in this course communicate in Spanish in familiar topics using a variety of words, phrases, simple sentences and questions that have been highly practiced and memorized.",
+        "prerequisites": "SPAN 1110."
+      },
+      "fieldLinks": {
+        "prerequisites": [
+          {
+            "coid": "2351",
+            "text": "SPAN 1110",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=2351"
+          }
+        ]
+      },
+      "sourceUrl": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=2352",
+      "coid": "2352"
+    },
+    {
+      "catalogTitle": "MATH 101 - Mathematical Concepts",
+      "code": "MATH 101",
+      "name": "Mathematical Concepts",
+      "creditContactText": "(2 CR, 2T + 0L)",
+      "creditsMin": 2,
+      "creditsMax": 2,
+      "lectureHours": 2,
+      "labHours": 0,
+      "fields": {
+        "description": "This is a co-requisite course for MATH 1215 - Intermediate Algebra. The course offers just-in-time support for MATH 1215 and it cannot be taken as a stand-alone course. Fundamental algebraic operations with integers, rational, and real numbers and manipulation with algebraic expressions will be reinforced in the context of Intermediate Algebra topics. Grades are awarded on a CR / NC basis."
+      },
+      "fieldLinks": {},
+      "sourceUrl": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=2361",
+      "coid": "2361"
+    },
+    {
+      "catalogTitle": "CHEM 2310 - Quantitative Analysis",
+      "code": "CHEM 2310",
+      "name": "Quantitative Analysis",
+      "creditContactText": "(2 CR, 2T + 0L)",
+      "creditsMin": 2,
+      "creditsMax": 2,
+      "lectureHours": 2,
+      "labHours": 0,
+      "fields": {
+        "description": "Analytical Chemistry is the science of chemical characterization. In this course, you will learn how particular chemical species of interest can be detected and how the amounts of those species can be determined. You will learn how chemical characterization involves chemical reactivity, physical measurement, and data interpretation. All these aspects of chemical characterization will be explored in lecture, reading, and problem solving. The study of precise and reliable chemical characterization is fundamental to further study and practice in chemistry, biology, medicine, geology, chemical engineering, and many other related fields. The understanding of the methods and limitations of chemical characterization is helpful in making informed judgments on a large variety of social and political issues.",
+        "prerequisites": "CHEM 1225, CHEM 1225L and MATH 1350.",
+        "corequisites": "CHEM 2310L."
+      },
+      "fieldLinks": {
+        "prerequisites": [
+          {
+            "coid": "1840",
+            "text": "CHEM 1225",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1840"
+          },
+          {
+            "coid": "1850",
+            "text": "CHEM 1225L",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1850"
+          },
+          {
+            "coid": "2146",
+            "text": "MATH 1350",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=2146"
+          }
+        ],
+        "corequisites": [
+          {
+            "coid": "1852",
+            "text": "CHEM 2310L",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1852"
+          }
+        ]
+      },
+      "sourceUrl": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1842",
+      "coid": "1842"
+    },
+    {
+      "catalogTitle": "CHEM 2310L - Quantitative Analysis Lab",
+      "code": "CHEM 2310L",
+      "name": "Quantitative Analysis Lab",
+      "creditContactText": "(2 CR, 0T + 2L)",
+      "creditsMin": 2,
+      "creditsMax": 2,
+      "lectureHours": 0,
+      "labHours": 2,
+      "fields": {
+        "description": "Laboratory experiments involving instrumentation emphasis on sampling, statistical, measurement, and separation techniques. You will focus on proper documentation and data analysis.",
+        "corequisites": "CHEM 2310."
+      },
+      "fieldLinks": {
+        "corequisites": [
+          {
+            "coid": "1842",
+            "text": "CHEM 2310",
+            "url": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1842"
+          }
+        ]
+      },
+      "sourceUrl": "https://catalog.nnmc.edu/preview_course_nopop.php?catoid=3&coid=1852",
+      "coid": "1852"
     }
   ]
 }

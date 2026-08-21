@@ -181,9 +181,9 @@ def _plan_course_to_contract(plan_course: PlanCourse) -> ScheduleCourse:
         notes=plan_course.notes,
         course_code=plan_course.course.course_code,
         course_name=plan_course.course.course_name,
-        credits=plan_course.course.credits,
-        lecture_hours=plan_course.course.lecture_hours,
-        lab_hours=plan_course.course.lab_hours,
+        credits=float(plan_course.course.credits),
+        lecture_hours=float(plan_course.course.lecture_hours),
+        lab_hours=float(plan_course.course.lab_hours),
         recommended_year=plan_course.course.recommended_year,
         recommended_semester=plan_course.course.recommended_semester,
         planned_term=(
@@ -210,7 +210,7 @@ def _offering_to_contract(offering: CourseOffering) -> ScheduleCourseOffering:
         offering_type=offering.offering_type,
         course_code=offering.course.course_code,
         course_name=offering.course.course_name,
-        credits=offering.course.credits,
+        credits=float(offering.course.credits),
         term=_term_to_contract(offering.term),
     )
 

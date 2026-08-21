@@ -98,13 +98,18 @@ def _build_audit(plan: EdPlan, catalog_courses: list[Course]) -> dict:
     }
 
 
-def _planned_credits(plan_courses: list[PlanCourse]) -> int:
+def _planned_credits(plan_courses: list[PlanCourse]) -> float:
     return sum(
-        plan_course.course.credits for plan_course in plan_courses if plan_course.course is not None
+        (
+            float(plan_course.course.credits)
+            for plan_course in plan_courses
+            if plan_course.course is not None
+        ),
+        0.0,
     )
 
 
-def _percentage(numerator: int, denominator: int) -> float:
+def _percentage(numerator: float | int, denominator: float | int) -> float:
     if denominator <= 0:
         return 0.0
     return min(round((numerator / denominator) * 100, 2), 100.0)

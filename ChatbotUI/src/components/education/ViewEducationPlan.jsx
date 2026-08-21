@@ -24,8 +24,10 @@ const hasMeaningfulRequirement = (value) => {
 const CourseMeta = ({ course }) => {
 	const prereqText = normalizeRequirement(course.prerequisite);
 	const coreqText = normalizeRequirement(course.corequisite);
+	const preOrCoreqText = normalizeRequirement(course.pre_or_corequisite);
 	const showPrereq = hasMeaningfulRequirement(prereqText);
 	const showCoreq = hasMeaningfulRequirement(coreqText);
+	const showPreOrCoreq = hasMeaningfulRequirement(preOrCoreqText);
 
 	return (
 		<div className="text-xs text-slate-600 flex flex-wrap items-center gap-x-4 gap-y-1">
@@ -53,6 +55,12 @@ const CourseMeta = ({ course }) => {
 				<span className="inline-flex items-center gap-1 whitespace-nowrap">
 					<span className="text-sky-700">Corequisite:</span>
 					<span className="text-yellow-500 font-medium">{coreqText}</span>
+				</span>
+			)}
+			{showPreOrCoreq && (
+				<span className="inline-flex items-center gap-1 whitespace-nowrap">
+					<span className="text-sky-700">Pre/Corequisite:</span>
+					<span className="text-violet-600 font-medium">{preOrCoreqText}</span>
 				</span>
 			)}
 		</div>
@@ -354,6 +362,7 @@ const ViewEducationPlan = () => {
 						semesters[semKey].forEach((course) => {
 							const prereq = normalizeRequirement(course.prerequisite);
 							const coreq = normalizeRequirement(course.corequisite);
+							const preOrCoreq = normalizeRequirement(course.pre_or_corequisite);
 							addLine(
 								`    • ${course.code || ""} — ${
 									course.courseName || course.name || "Course"
@@ -364,6 +373,9 @@ const ViewEducationPlan = () => {
 							}
 							if (hasMeaningfulRequirement(coreq)) {
 								addLine(`      Corequisite: ${coreq}`);
+							}
+							if (hasMeaningfulRequirement(preOrCoreq)) {
+								addLine(`      Pre/Corequisite: ${preOrCoreq}`);
 							}
 						});
 						addLine(" ");

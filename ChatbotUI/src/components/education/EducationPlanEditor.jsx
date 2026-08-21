@@ -120,6 +120,8 @@ const buildDefaultPlanState = (
 				credits: course.credits,
 				prerequisite: course.prerequisite,
 				corequisite: course.corequisite,
+				pre_or_corequisite: course.pre_or_corequisite,
+				requirement_expressions: course.requirement_expressions,
 				schedule: course.schedule,
 			}))
 	);
@@ -770,6 +772,7 @@ const EducationPlanEditor = () => {
 		"";
 
 	const programTotalCredits = selectedProgramMeta?.total_credit_hours ?? 0;
+	const programTotalCreditsText = selectedProgramMeta?.total_credit_hours_text || "";
 
 	const addedCourseCodes = useMemo(
 		() => new Set(courses.map((course) => course.code)),
@@ -924,6 +927,8 @@ const EducationPlanEditor = () => {
 				credits: course.credits,
 				prerequisite: course.prerequisite,
 				corequisite: course.corequisite,
+				pre_or_corequisite: course.pre_or_corequisite,
+				requirement_expressions: course.requirement_expressions,
 				schedule: course.schedule,
 			};
 
@@ -1012,6 +1017,8 @@ const EducationPlanEditor = () => {
 								credits: item.credits,
 								prerequisite: item.prerequisite,
 								corequisite: item.corequisite,
+								pre_or_corequisite: item.pre_or_corequisite,
+								requirement_expressions: item.requirement_expressions,
 								schedule: item.schedule,
 							});
 						});
@@ -1260,8 +1267,11 @@ const EducationPlanEditor = () => {
 		[defaultPlan]
 	);
 	const requiredCredits = Number(programTotalCredits) || defaultPlanCredits || totalCredits || 0;
+	const reportedCreditRequirement = programTotalCreditsText
+		.replace(/^Total Credits:\s*/i, "")
+		.replace(/-/g, "–");
 	const creditsProgressText = requiredCredits
-		? `${totalCredits}/${requiredCredits} credits`
+		? `${totalCredits}/${reportedCreditRequirement || requiredCredits} credits`
 		: `${totalCredits} credits earned; program requirement not reported`;
 	const progressPercent =
 		requiredCredits > 0 ? Math.min(100, Math.round((totalCredits / requiredCredits) * 100)) : 0;
@@ -1580,6 +1590,12 @@ const EducationPlanEditor = () => {
 																		{course.corequisite}
 																	</p>
 																)}
+																{hasMeaningfulRequirement(course.pre_or_corequisite) && (
+																	<p className="mt-1 text-xs font-semibold text-slate-600">
+																		<span className="font-extrabold text-blue-700">Pre/Coreq:</span>{" "}
+																		{course.pre_or_corequisite}
+																	</p>
+																)}
 														</div>
 														<div className="mt-auto flex justify-end pt-3">
 															<button
@@ -1879,6 +1895,7 @@ const EducationPlanEditor = () => {
 												{courseList.map((course) => {
 													const prereqText = normalizeRequirement(course.prerequisite);
 													const coreqText = normalizeRequirement(course.corequisite);
+													const preOrCoreqText = normalizeRequirement(course.pre_or_corequisite);
 													const scheduleText = formatSchedule(course.schedule);
 													const hasIssue = dependencyIssues.some(
 														(issue) => issue.courseCode === course.code
@@ -1911,6 +1928,11 @@ const EducationPlanEditor = () => {
 																		{hasMeaningfulRequirement(coreqText) && (
 																			<span className="text-sky-700">
 																				Corequisite: <span className="text-yellow-500">{coreqText}</span>
+																			</span>
+																		)}
+																		{hasMeaningfulRequirement(preOrCoreqText) && (
+																			<span className="text-sky-700">
+																				Pre/Corequisite: <span className="text-violet-600">{preOrCoreqText}</span>
 																			</span>
 																		)}
 																	</div>

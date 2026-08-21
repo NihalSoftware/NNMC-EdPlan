@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
+from decimal import Decimal
 
 from sqlalchemy import (
     CheckConstraint,
+    DateTime,
     ForeignKey,
     Index,
     Integer,
+    Numeric,
     String,
     Text,
     UniqueConstraint,
@@ -56,6 +60,7 @@ class Program(Base):
         ),
         CheckConstraint("total_credit_hours > 0", name="programs_total_credit_hours_chk"),
         Index("idx_programs_university_id", "university_id"),
+        Index("idx_programs_official_source_id", "official_source_id"),
     )
 
     program_id: Mapped[uuid.UUID] = mapped_column(
@@ -72,6 +77,9 @@ class Program(Base):
     degree: Mapped[str] = mapped_column(String(120), nullable=False)
     total_credit_hours: Mapped[int] = mapped_column(Integer, nullable=False)
     metadata_json: Mapped[dict | None] = mapped_column(JSONB)
+    official_source_id: Mapped[str | None] = mapped_column(String(64))
+    official_source_url: Mapped[str | None] = mapped_column(String(512))
+    source_retrieved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     university: Mapped[University] = relationship(back_populates="programs")
     courses: Mapped[list[Course]] = relationship(back_populates="program")
@@ -93,6 +101,7 @@ class Course(Base):
             name="courses_recommended_semester_chk",
         ),
         Index("idx_courses_course_code", "course_code"),
+        Index("idx_courses_official_source_id", "official_source_id"),
     )
 
     course_id: Mapped[uuid.UUID] = mapped_column(
@@ -107,14 +116,21 @@ class Course(Base):
     )
     course_code: Mapped[str] = mapped_column(String(40), nullable=False)
     course_name: Mapped[str] = mapped_column(String(255), nullable=False)
-    credits: Mapped[int] = mapped_column(Integer, nullable=False)
-    lecture_hours: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
-    lab_hours: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
+    credits: Mapped[Decimal] = mapped_column(Numeric(6, 2), nullable=False)
+    lecture_hours: Mapped[Decimal] = mapped_column(
+        Numeric(6, 2), nullable=False, server_default=text("0")
+    )
+    lab_hours: Mapped[Decimal] = mapped_column(
+        Numeric(6, 2), nullable=False, server_default=text("0")
+    )
     recommended_year: Mapped[int | None] = mapped_column(Integer)
     recommended_semester: Mapped[str | None] = mapped_column(String(20))
     description: Mapped[str | None] = mapped_column(Text)
     metadata_json: Mapped[dict | None] = mapped_column(JSONB)
     source_sequence: Mapped[int | None] = mapped_column(Integer)
+    official_source_id: Mapped[str | None] = mapped_column(String(64))
+    official_source_url: Mapped[str | None] = mapped_column(String(512))
+    source_retrieved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     @property
     def is_elective(self) -> bool:

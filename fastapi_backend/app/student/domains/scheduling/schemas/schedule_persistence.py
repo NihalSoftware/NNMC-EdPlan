@@ -38,7 +38,7 @@ class ScheduleSummary(BaseModel):
     status: str
     is_active: bool = False
     is_favorite: bool = False
-    total_credits: int
+    total_credits: float
     notes: str | None = None
     generated_at: datetime | None = None
     selected_section_ids: list[str] = Field(default_factory=list)
@@ -68,7 +68,7 @@ class SavedScheduleDetail(BaseModel):
     source: str
     is_active: bool
     is_favorite: bool
-    total_credits: int
+    total_credits: float
     score: float | None = None
     normalized_score: float | None = None
     rank_at_generation: int | None = None

@@ -43,7 +43,7 @@ class ScheduleValidationSummary(BaseModel):
 
 
 class ScheduleMetrics(BaseModel):
-    total_credits: int
+    total_credits: float
     earliest_start_time: time | None = None
     latest_end_time: time | None = None
     total_instruction_minutes: int

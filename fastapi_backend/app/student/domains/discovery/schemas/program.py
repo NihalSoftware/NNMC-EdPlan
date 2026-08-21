@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 
@@ -14,11 +16,17 @@ class ProgramSummary(BaseModel):
     program_name: str
     degree: str
     total_credit_hours: int
+    total_credit_hours_text: str | None = None
+    total_credit_hours_min: float | None = None
+    total_credit_hours_max: float | None = None
     catalog_title: str | None = None
     catalog_url: str | None = None
     catalog_year: str | None = None
     description: str | None = None
     metadata_json: dict | None = None
+    official_source_id: str | None = None
+    official_source_url: str | None = None
+    source_retrieved_at: datetime | None = None
     university: UniversitySummary
 
 
@@ -28,9 +36,9 @@ class CourseSummary(BaseModel):
     course_code: str
     code: str | None = None
     course_name: str
-    credits: int
-    lecture_hours: int = 0
-    lab_hours: int = 0
+    credits: float
+    lecture_hours: float = 0
+    lab_hours: float = 0
     recommended_year: int | None = None
     year: int | str | None = None
     recommended_semester: str | None = None
@@ -40,13 +48,18 @@ class CourseSummary(BaseModel):
     description: str | None = None
     prerequisite: str | None = None
     corequisite: str | None = None
+    pre_or_corequisite: str | None = None
+    requirement_expressions: dict = Field(default_factory=dict)
     catalog_url: str | None = None
     credit_text: str | None = None
-    credits_min: int | None = None
-    credits_max: int | None = None
+    credits_min: float | None = None
+    credits_max: float | None = None
     requirement_occurrences: list[dict] = Field(default_factory=list)
     metadata_json: dict | None = None
     source_sequence: int | None = None
+    official_source_id: str | None = None
+    official_source_url: str | None = None
+    source_retrieved_at: datetime | None = None
 
 
 class ProgramDetail(ProgramSummary):

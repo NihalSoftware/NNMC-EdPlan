@@ -17,7 +17,7 @@ class ProgramCoursePayload(BaseModel):
     semester: str | None = None
     code: str | None = None
     course_name: str | None = Field(None, alias="courseName")
-    credits: int | None = None
+    credits: float | None = None
     prerequisite: str | None = None
     corequisite: str | None = None
     schedule: ScheduleBlock | dict | None = None

@@ -171,11 +171,17 @@ def _course_to_dict(course: Course, *, include_dependencies: bool = False) -> di
         "program_name": program.program_name,
         "degree": program.degree,
         "total_credit_hours": program.total_credit_hours,
+        "total_credit_hours_text": program_metadata.get("catalog_total_credits_text"),
+        "total_credit_hours_min": program_metadata.get("catalog_total_credits_min"),
+        "total_credit_hours_max": program_metadata.get("catalog_total_credits_max"),
         "catalog_title": program_metadata.get("catalog_title"),
         "catalog_url": program_metadata.get("catalog_url"),
         "catalog_year": program_metadata.get("catalog_year"),
         "description": "\n\n".join(program_metadata.get("catalog_intro") or []) or None,
         "metadata_json": program_metadata,
+        "official_source_id": program.official_source_id,
+        "official_source_url": program.official_source_url,
+        "source_retrieved_at": program.source_retrieved_at,
         "university": {
             "university_id": str(program.university.university_id),
             "university_name": program.university.university_name,
@@ -212,6 +218,8 @@ def _course_summary_to_dict(course: Course) -> dict:
         "default_plan_eligible": course.default_plan_eligible,
         "prerequisite": metadata.get("prerequisite"),
         "corequisite": metadata.get("corequisite"),
+        "pre_or_corequisite": metadata.get("pre_or_corequisite"),
+        "requirement_expressions": metadata.get("requirement_expressions") or {},
         "description": course.description,
         "metadata_json": metadata,
         "source_sequence": course.source_sequence,
@@ -220,6 +228,9 @@ def _course_summary_to_dict(course: Course) -> dict:
         "credits_min": metadata.get("credits_min"),
         "credits_max": metadata.get("credits_max"),
         "requirement_occurrences": metadata.get("requirement_occurrences") or [],
+        "official_source_id": course.official_source_id,
+        "official_source_url": course.official_source_url,
+        "source_retrieved_at": course.source_retrieved_at,
     }
 
 

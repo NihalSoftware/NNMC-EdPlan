@@ -34,7 +34,9 @@ const ProgramCard = ({ program, isTargeted = false }) => (
 				<dt className="flex items-center gap-2 font-semibold text-slate-500">
 					<FaGraduationCap aria-hidden="true" /> Total Credits
 				</dt>
-				<dd className="mt-1 font-black text-slate-900">{program.credits ?? "Varies"}</dd>
+				<dd className="mt-1 font-black text-slate-900">
+					{program.creditsDisplay ?? program.credits ?? "Varies"}
+				</dd>
 			</div>
 		</dl>
 

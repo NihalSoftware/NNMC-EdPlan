@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from decimal import Decimal
 from typing import Any
 
 from sqlalchemy import (
@@ -12,6 +13,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    Numeric,
     String,
     Text,
     UniqueConstraint,
@@ -102,8 +104,8 @@ class PlanSchedule(Base):
         nullable=False,
         server_default=func.now(),
     )
-    total_credits: Mapped[int] = mapped_column(
-        Integer,
+    total_credits: Mapped[Decimal] = mapped_column(
+        Numeric(7, 2),
         nullable=False,
         server_default=text("0"),
     )
@@ -186,8 +188,8 @@ class SchedulePilotSchedule(Base):
         nullable=False,
         server_default=text("false"),
     )
-    total_credits: Mapped[int] = mapped_column(
-        Integer,
+    total_credits: Mapped[Decimal] = mapped_column(
+        Numeric(7, 2),
         nullable=False,
         server_default=text("0"),
     )

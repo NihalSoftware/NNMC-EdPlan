@@ -49,6 +49,10 @@ const normalizeCourse = (course) => {
 		lab_hours: metadata.lab_hours_exact ?? course.lab_hours,
 		prerequisite: course.prerequisite || metadata.prerequisite || "",
 		corequisite: course.corequisite || metadata.corequisite || "",
+		pre_or_corequisite:
+			course.pre_or_corequisite || metadata.pre_or_corequisite || "",
+		requirement_expressions:
+			course.requirement_expressions || metadata.requirement_expressions || {},
 		recommended_year:
 			YEAR_LABELS[course.recommended_year] ||
 			course.recommended_year ||
@@ -61,6 +65,12 @@ const normalizeCourse = (course) => {
 		description: course.description || metadata.fields?.description || "",
 		catalog_url: course.catalog_url || metadata.catalog_url || "",
 		requirement_occurrences: requirements,
+		official_source_id:
+			course.official_source_id || metadata.catalog_course_id || "",
+		official_source_url:
+			course.official_source_url || course.catalog_url || metadata.catalog_url || "",
+		source_retrieved_at:
+			course.source_retrieved_at || metadata.source_retrieved_at || "",
 		metadata_json: metadata,
 		source_sequence: course.source_sequence,
 	};
@@ -119,6 +129,18 @@ const normalizeProgram = (program, courses = []) => {
 		campus: universityName,
 		degree: program.degree || "",
 		total_credit_hours: program.total_credit_hours,
+		total_credit_hours_text:
+			program.total_credit_hours_text ||
+			program.metadata_json?.catalog_total_credits_text ||
+			"",
+		total_credit_hours_min:
+			program.total_credit_hours_min ??
+			program.metadata_json?.catalog_total_credits_min ??
+			program.total_credit_hours,
+		total_credit_hours_max:
+			program.total_credit_hours_max ??
+			program.metadata_json?.catalog_total_credits_max ??
+			program.total_credit_hours,
 		catalog_title:
 			program.catalog_title || program.metadata_json?.catalog_title || "",
 		catalog_url:

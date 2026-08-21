@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import Sequence
+from decimal import Decimal
 
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -83,7 +84,7 @@ class SchedulePersistenceRepository:
         db: AsyncSession,
         *,
         plan_id: str | uuid.UUID,
-        total_credits: int,
+        total_credits: float,
         status: str = "Draft",
         schedule_name: str | None = None,
         source: str = "system_generated",
@@ -103,7 +104,7 @@ class SchedulePersistenceRepository:
         schedule = SchedulePilotSchedule(
             plan_id=parsed_plan_id,
             schedule_name=schedule_name,
-            total_credits=total_credits,
+            total_credits=_credit_decimal(total_credits),
             status=status,
             source=source,
             is_active=False,
@@ -131,13 +132,13 @@ class SchedulePersistenceRepository:
         self,
         schedule: SchedulePilotSchedule,
         *,
-        total_credits: int | None = None,
+        total_credits: float | None = None,
         status: str | None = None,
         schedule_name: str | None = None,
         update_schedule_name: bool = False,
     ) -> SchedulePilotSchedule:
         if total_credits is not None:
-            schedule.total_credits = total_credits
+            schedule.total_credits = _credit_decimal(total_credits)
         if status is not None:
             schedule.status = status
         if update_schedule_name:
@@ -483,14 +484,14 @@ class SchedulePersistenceRepository:
         db: AsyncSession,
         *,
         plan_id: str | uuid.UUID,
-        total_credits: int,
+        total_credits: float,
         status: str = "Draft",
         notes: str | None = None,
     ) -> PlanSchedule:
         parsed_plan_id = _require_uuid(plan_id, "plan_id")
         schedule = PlanSchedule(
             plan_id=parsed_plan_id,
-            total_credits=total_credits,
+            total_credits=_credit_decimal(total_credits),
             status=status,
             notes=notes,
         )
@@ -529,6 +530,10 @@ def _require_uuid(value: str | uuid.UUID, field_name: str) -> uuid.UUID:
     if parsed is None:
         raise ValueError(f"Invalid {field_name}.")
     return parsed
+
+
+def _credit_decimal(value: float | int | Decimal) -> Decimal:
+    return value if isinstance(value, Decimal) else Decimal(str(value))
 
 
 def _parse_uuid_list(values: Sequence[str | uuid.UUID]) -> list[uuid.UUID]:
