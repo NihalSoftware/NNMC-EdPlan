@@ -4,6 +4,11 @@ This React 18 / Vite application is dedicated to Northern New Mexico College.
 It includes NNMC program and career exploration, official College Scorecard
 details, education-plan building, saved plans, and scheduling.
 
+## Prerequisites
+
+- Node.js 24.x
+- npm with the committed `package-lock.json`
+
 ## Development
 
 ```bash

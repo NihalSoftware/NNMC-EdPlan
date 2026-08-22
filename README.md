@@ -20,7 +20,7 @@ origin to the `connect-src` directive in `ChatbotUI/vercel.json`.
 
 ## Prerequisites
 
-- Node.js 22.12-22.x (CI uses 22.20.0)
+- Node.js 24.x
 - npm with the committed `package-lock.json`
 - Python 3.13 recommended (the package metadata supports Python 3.11+)
 - PostgreSQL 14+ recommended
