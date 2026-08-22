@@ -1,6 +1,11 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import clsx from "clsx";
-import { load, remove } from "../../utils/storage.js";
+import {
+	load,
+	loadSession,
+	remove,
+	removeSession,
+} from "../../utils/storage.js";
 import {
 	FaBookOpen,
 	FaBuildingColumns,
@@ -39,7 +44,7 @@ const NavItem = ({ to, label, icon: Icon, badge, onClick }) => (
 const Navigation = ({ open, setOpen }) => {
 	const location = useLocation();
 	const navigate = useNavigate();
-	const isAuthenticated = Boolean(load("AuthToken"));
+	const isAuthenticated = Boolean(loadSession("AuthToken"));
 	const profile = load("UserProfile");
 	const firstName =
 		typeof profile?.first_name === "string"
@@ -58,6 +63,7 @@ const Navigation = ({ open, setOpen }) => {
 
 	const handleAuthClick = () => {
 		if (isAuthenticated) {
+			removeSession("AuthToken");
 			remove("AuthToken");
 			remove("UserEmail");
 			remove("UserProfile");

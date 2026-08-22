@@ -60,6 +60,15 @@ export const saveSession = (key, value) => {
   }
 };
 
+export const removeSession = (key) => {
+  if (!safeWindow) return;
+  try {
+    safeWindow.sessionStorage.removeItem(key);
+  } catch {
+    // Storage cleanup is best-effort.
+  }
+};
+
 export const remove = (key) => {
   if (!safeWindow) return;
   try {
